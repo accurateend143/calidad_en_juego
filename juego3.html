@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Normas y Mantenimiento · Calidad en juego</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="contenedor">
+    <a class="volver" href="index.html">← Volver al inicio</a>
+    <section class="panel">
+      <h1>⚙️ Normas y Mantenimiento</h1>
+      <p class="consigna">Respondé cada situación: normas ISO y tipos de mantenimiento.</p>
+      <div id="juego"></div>
+    </section>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    Juego.quiz({
+      contenedor: "juego",
+      preguntas: [
+        {
+          texto: "¿Qué norma establece los requisitos de un sistema de gestión de la calidad?",
+          opciones: ["ISO 9001", "ISO 14001", "ISO 45001", "ISO 27001"],
+          correcta: 0,
+          explicacion: "ISO 9001 define los requisitos para un sistema de gestión de la calidad, enfocado en la satisfacción del cliente y la mejora continua."
+        },
+        {
+          texto: "¿Qué norma se ocupa de la gestión ambiental de una organización?",
+          opciones: ["ISO 9001", "ISO 14001", "ISO 22000", "ISO 50001"],
+          correcta: 1,
+          explicacion: "ISO 14001 establece los requisitos para un sistema de gestión ambiental."
+        },
+        {
+          texto: "Una máquina se detiene por una avería y recién entonces se la repara. ¿Qué tipo de mantenimiento es?",
+          opciones: ["Preventivo", "Predictivo", "Correctivo", "Ninguno"],
+          correcta: 2,
+          explicacion: "El mantenimiento correctivo se realiza después de que ocurre la falla, para reparar el equipo."
+        },
+        {
+          texto: "Una empresa cambia el aceite de sus camiones cada 10.000 km, sin esperar a que fallen. ¿Qué tipo de mantenimiento es?",
+          opciones: ["Correctivo", "Predictivo", "Reactivo", "Preventivo"],
+          correcta: 3,
+          explicacion: "El mantenimiento preventivo se programa a intervalos fijos de tiempo o de uso para evitar fallas."
+        },
+        {
+          texto: "Un sensor de vibraciones detecta que un rodamiento empieza a desgastarse y se programa su cambio antes de que falle. ¿Qué tipo de mantenimiento es?",
+          opciones: ["Predictivo", "Correctivo", "Preventivo", "De emergencia"],
+          correcta: 0,
+          explicacion: "El mantenimiento predictivo se basa en medir el estado real del equipo (vibraciones, temperatura, etc.) para intervenir en el momento justo."
+        },
+        {
+          texto: "Una empresa quiere gestionar sus residuos y reducir su impacto ambiental de forma sistemática. ¿Qué norma le conviene?",
+          opciones: ["ISO 9001", "ISO 14001", "Ninguna, no existe norma para eso", "Solo mantenimiento preventivo"],
+          correcta: 1,
+          explicacion: "ISO 14001 ayuda a organizar la gestión de los aspectos ambientales de la empresa."
+        },
+        {
+          texto: "Una empresa quiere asegurar que cumple los requisitos de sus clientes y mejorar su satisfacción de manera continua. ¿Qué norma le conviene?",
+          opciones: ["ISO 14001", "Mantenimiento correctivo", "ISO 9001", "Mantenimiento predictivo"],
+          correcta: 2,
+          explicacion: "ISO 9001 está orientada a la calidad y a la satisfacción del cliente."
+        }
+      ],
+      repaso: [
+        "ISO 9001: gestión de la calidad. ISO 14001: gestión ambiental.",
+        "Correctivo: se repara después de la falla.",
+        "Preventivo: se programa a intervalos fijos para evitar fallas.",
+        "Predictivo: se interviene según el estado real medido del equipo."
+      ]
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestión de la Calidad · Calidad en juego</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="contenedor">
+    <a class="volver" href="index.html">← Volver al inicio</a>
+    <section class="panel">
+      <h1>🧩 Gestión de la Calidad</h1>
+      <p class="consigna">Tocá un concepto de la columna izquierda y luego su definición en la derecha.</p>
+      <div id="juego"></div>
+    </section>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    Juego.pares({
+      contenedor: "juego",
+      pares: [
+        ["Calidad", "Conjunto de características de un producto o servicio que satisfacen las necesidades del cliente."],
+        ["Confiabilidad", "Probabilidad de que el producto funcione sin fallas durante un tiempo determinado."],
+        ["Durabilidad", "Vida útil del producto antes de tener que reemplazarlo."],
+        ["Conformidad", "Grado en que el producto cumple con las especificaciones establecidas."],
+        ["Mejora continua", "Esfuerzo permanente por perfeccionar los procesos, paso a paso."],
+        ["Ciclo PHVA", "Planificar, Hacer, Verificar y Actuar: método para mejorar de manera repetida."]
+      ]
+    });
+  </script>
+</body>
+</html>

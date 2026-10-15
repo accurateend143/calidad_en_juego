@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Herramientas de Calidad · Calidad en juego</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div class="contenedor">
+    <a class="volver" href="index.html">← Volver al inicio</a>
+    <section class="panel">
+      <h1>🛠️ Herramientas de Calidad</h1>
+      <p class="consigna">Elegí la herramienta que mejor resuelve cada situación.</p>
+      <div id="juego"></div>
+    </section>
+  </div>
+
+  <script src="js/common.js"></script>
+  <script>
+    Juego.quiz({
+      contenedor: "juego",
+      preguntas: [
+        {
+          texto: "Una fábrica quiere descubrir qué pocas causas generan la mayoría de sus defectos. ¿Qué usa?",
+          opciones: ["Gráfico de Pareto", "Diagrama de flujo", "Hoja de verificación", "Diagrama de dispersión"],
+          correcta: 0,
+          explicacion: "El gráfico de Pareto ordena las causas de mayor a menor y muestra que unas pocas explican la mayor parte del problema (regla 80/20)."
+        },
+        {
+          texto: "Se rompen muchos envases y el equipo quiere ordenar las posibles causas por categorías: mano de obra, máquina, método, material. ¿Qué usa?",
+          opciones: ["Histograma", "Diagrama de causa y efecto (Ishikawa)", "Gráfico de control", "Diagrama de flujo"],
+          correcta: 1,
+          explicacion: "El diagrama de causa y efecto, también llamado espina de pescado, organiza las causas posibles de un problema por categorías."
+        },
+        {
+          texto: "Necesitan representar paso a paso cómo se prepara un pedido, de principio a fin. ¿Qué usan?",
+          opciones: ["Gráfico de Pareto", "Hoja de verificación", "Diagrama de flujo", "Histograma"],
+          correcta: 2,
+          explicacion: "El diagrama de flujo muestra la secuencia de pasos de un proceso con símbolos y flechas."
+        },
+        {
+          texto: "Quieren anotar con simples marcas cuántas veces ocurre cada tipo de defecto mientras se produce. ¿Qué usan?",
+          opciones: ["Diagrama de dispersión", "Hoja de verificación", "Gráfico de control", "Diagrama de Ishikawa"],
+          correcta: 1,
+          explicacion: "La hoja de verificación sirve para recolectar datos de forma ordenada y sencilla en el momento en que ocurren."
+        },
+        {
+          texto: "¿Aumentan los defectos cuando sube la temperatura del horno? Quieren ver la relación entre dos variables. ¿Qué usan?",
+          opciones: ["Histograma", "Diagrama de flujo", "Gráfico de Pareto", "Diagrama de dispersión"],
+          correcta: 3,
+          explicacion: "El diagrama de dispersión grafica pares de datos para ver si existe relación entre dos variables."
+        },
+        {
+          texto: "Quieren ver cómo se distribuyen los pesos de 200 paquetes, agrupados por rangos en barras. ¿Qué usan?",
+          opciones: ["Histograma", "Hoja de verificación", "Diagrama de Ishikawa", "Diagrama de flujo"],
+          correcta: 0,
+          explicacion: "El histograma muestra la distribución de un conjunto de datos agrupándolos en intervalos."
+        },
+        {
+          texto: "Quieren seguir una medida del proceso a lo largo del tiempo, con límites superior e inferior, para detectar cuándo se descontrola. ¿Qué usan?",
+          opciones: ["Gráfico de Pareto", "Gráfico de control", "Diagrama de dispersión", "Hoja de verificación"],
+          correcta: 1,
+          explicacion: "El gráfico de control sigue el comportamiento de un proceso en el tiempo y avisa cuando se sale de los límites establecidos."
+        }
+      ],
+      repaso: [
+        "Pareto: prioriza las pocas causas más importantes.",
+        "Ishikawa: organiza las causas de un problema.",
+        "Diagrama de flujo: describe los pasos de un proceso.",
+        "Hoja de verificación, histograma, dispersión y gráfico de control: recolectan y analizan datos."
+      ]
+    });
+  </script>
+</body>
+</html>
