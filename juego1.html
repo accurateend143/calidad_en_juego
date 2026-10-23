@@ -3,31 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gestión de la Calidad · Calidad en juego</title>
+  <title>La Cinta de Calidad · Calidad en juego</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/cinta.css">
 </head>
-<body>
-  <div class="contenedor">
-    <a class="volver" href="index.html">← Volver al inicio</a>
-    <section class="panel">
-      <h1>🧩 Gestión de la Calidad</h1>
-      <p class="consigna">Tocá un concepto de la columna izquierda y luego su definición en la derecha.</p>
+<body class="pagina-juego">
+  <header class="banda">
+    <div class="banda-contenido">
+      <a class="volver" href="index.html">← Volver al inicio</a>
+      <h1>📦 La Cinta de Calidad</h1>
+      <p>Gestión de la Calidad · 4 rondas cortas. Se juega arrastrando o tocando.</p>
+    </div>
+  </header>
+
+  <main class="contenedor contenedor-juego">
+    <section class="panel panel-juego">
       <div id="juego"></div>
     </section>
-  </div>
+  </main>
 
-  <script src="js/common.js"></script>
+  <footer class="sitio">Instituto La Salette · 6° Computación · Muestra de fin de año</footer>
+
+  <script src="js/cinta.js"></script>
   <script>
-    Juego.pares({
+    /* Ajustar estos textos para que coincidan con la primera entrega corregida */
+    Juego.cinta({
       contenedor: "juego",
-      pares: [
-        ["Calidad", "Conjunto de características de un producto o servicio que satisfacen las necesidades del cliente."],
-        ["Confiabilidad", "Probabilidad de que el producto funcione sin fallas durante un tiempo determinado."],
-        ["Durabilidad", "Vida útil del producto antes de tener que reemplazarlo."],
-        ["Conformidad", "Grado en que el producto cumple con las especificaciones establecidas."],
-        ["Mejora continua", "Esfuerzo permanente por perfeccionar los procesos, paso a paso."],
-        ["Ciclo PHVA", "Planificar, Hacer, Verificar y Actuar: método para mejorar de manera repetida."]
-      ]
+      intro: "Manejá una cinta de paquetes en un centro logístico de Andreani. En cada ronda, la calidad se piensa de otra forma.",
+      aviso: "Juego con fines educativos. Los datos son simulados y no describen la operación real de Andreani.",
+      estaciones: ["Recepción", "Clasificación", "Carga"],
+      rondas: [
+        {
+          titulo: "Ronda 1 · Inspección",
+          consigna: "Sos el inspector al final de la cinta. Arrastrá al tacho (o tocá) los paquetes con marca roja.",
+          aprendizaje: "controlar solo al final detecta el problema tarde, tira trabajo ya hecho y no evita que el defecto vuelva a aparecer."
+        },
+        {
+          titulo: "Ronda 2 · Control y aseguramiento",
+          consigna: "Tenés 2 lupas. Ponelas en las estaciones donde nacen los defectos para corregirlos ahí.",
+          aprendizaje: "controlar el proceso, y no solo el resultado, baja el costo. Los datos te dicen dónde mirar."
+        },
+        {
+          titulo: "Ronda 3 · Calidad Total",
+          consigna: "Dale equipo a las tres estaciones, mejorá las que tienen problemas y respondé lo que pide el cliente.",
+          aprendizaje: "la calidad se construye entre todos, empieza por entender qué quiere el cliente y tiene más de una dimensión."
+        },
+        {
+          titulo: "Ronda 4 · Mejora continua",
+          consigna: "El ciclo PHVA resuelve un problema en 4 fases: Planificar, Hacer, Verificar y Actuar. En cada fase, elegí la acción que corresponde.",
+          aprendizaje: "la meta se mueve: mejorar nunca termina."
+        }
+      ],
+      mejoras: [
+        { nombre: "Capacitación", icono: "libro" },
+        { nombre: "Procedimiento claro", icono: "lista" },
+        { nombre: "Aviso del cliente", icono: "charla" }
+      ],
+      dimensiones: [
+        { pedido: "Quiero que llegue en la fecha prometida", dimension: "Puntualidad", respuesta: "Ruta planificada", icono: "reloj" },
+        { pedido: "Quiero que llegue sin daños", dimension: "Fiabilidad / conformidad", respuesta: "Embalaje reforzado", icono: "escudo" },
+        { pedido: "Quiero saber dónde está mi paquete", dimension: "Información / seguimiento", respuesta: "Seguimiento en línea", icono: "pin" },
+        { pedido: "Quiero que me traten bien", dimension: "Atención", respuesta: "Atención amable", icono: "corazon" }
+      ],
+      pdca: {
+        fases: ["Planificar", "Hacer", "Verificar", "Actuar"],
+        significados: ["definir la meta y el plan", "probar la solución en chico", "medir si funcionó", "dejarlo como norma"],
+        /* Las acciones van en el orden de las fases: Planificar, Hacer, Verificar, Actuar */
+        problemas: [
+          {
+            titulo: "Etiquetas ilegibles",
+            acciones: ["Meta: ninguna etiqueta ilegible", "Probar una impresora nueva en un turno", "Contar las etiquetas ilegibles de ese turno", "Usar la impresora nueva en todos los turnos"]
+          },
+          {
+            titulo: "Paquetes que se demoran en la carga",
+            acciones: ["Meta: cargar cada camión en 30 minutos", "Probar ordenar los paquetes por ruta", "Medir cuánto tarda la carga", "Escribir el nuevo orden en el procedimiento"]
+          },
+          {
+            titulo: "Direcciones incompletas",
+            acciones: ["Meta: cero envíos sin dirección completa", "Probar un formulario con campos obligatorios", "Revisar cuántas direcciones llegan incompletas", "Usar el formulario nuevo con todos los clientes"]
+          }
+        ],
+        indicadorInicial: 90,
+        mejoraPorVuelta: 2
+      },
+      hitos: [
+        { titulo: "Inspección", frase: "Revisar el producto terminado y separar lo que está mal." },
+        { titulo: "Control y aseguramiento", frase: "Controlar el proceso para que el defecto no avance." },
+        { titulo: "Calidad Total", frase: "Todos participan, con el cliente en el centro." },
+        { titulo: "Mejora continua", frase: "Planificar, hacer, verificar y actuar, una y otra vez." }
+      ],
+      mensajeFinal: "La calidad no consiste solo en controlar si un producto tiene defectos: consiste en prevenirlos, entender al cliente y mejorar siempre."
     });
   </script>
 </body>
