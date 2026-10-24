@@ -10,11 +10,13 @@ Sitio estático: HTML + CSS + JavaScript, sin servidor ni dependencias.
 ```
 calidad-en-juego/
 ├── index.html      Inicio con los tres juegos
-├── juego1.html     Gestión de la Calidad (unir conceptos con definiciones)
+├── juego1.html     Gestión de la Calidad ("La Cinta de Calidad")
 ├── juego2.html     Herramientas de Calidad (¿qué herramienta usar?)
 ├── juego3.html     Normas ISO y Mantenimiento (preguntas con explicación)
 ├── css/styles.css  Estilos
-└── js/common.js    Motores de juego (Juego.quiz y Juego.pares)
+├── css/cinta.css   Estilos de La Cinta de Calidad
+├── js/common.js    Motores de juego (Juego.quiz y Juego.pares)
+└── js/cinta.js     Motor de La Cinta de Calidad (Juego.cinta)
 ```
 
 ## Probarlo en tu compu
@@ -39,6 +41,7 @@ Las preguntas están dentro de cada archivo `juegoN.html`, en la llamada a `Jueg
 
 - Quiz: cada pregunta tiene `texto`, `opciones`, `correcta` (posición de la opción correcta, empezando en 0) y `explicacion`.
 - Pares: cada par es `["Concepto", "Definición"]`.
+- La Cinta de Calidad: los textos (estaciones, rondas, dimensiones, pasos del ciclo, hitos y mensaje final) están en la llamada a `Juego.cinta({...})` de `juego1.html`.
 
 ## Plan B para la muestra
 
