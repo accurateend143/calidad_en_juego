@@ -44,12 +44,12 @@ Las preguntas están dentro de cada archivo `juegoN.html`, en la llamada a `Jueg
 - Quiz: cada pregunta tiene `texto`, `opciones`, `correcta` (posición de la opción correcta, empezando en 0) y `explicacion`.
 - Pares: cada par es `["Concepto", "Definición"]`.
 - La Cinta de Calidad: los textos (estaciones, rondas, dimensiones, pasos del ciclo, hitos y mensaje final) están en la llamada a `Juego.cinta({...})` de `juego1.html`.
-- Mesa de Datos: todos los datos fijos están en la llamada a `Juego.mesa({...})` de `juego2.html`, una sección por estación:
-  - `conteo`: motivos de falla con su `cantidad` (definen el histograma y el Pareto) y cuántos tickets se clasifican a mano (`aMano`).
-  - `causas`: las `ramas` de la espina y las `tarjetas` (`texto`, `rama` correcta y `pista` si se equivoca).
-  - `flujo`: los `pasos` en orden, con su `forma` (`ovalo`, `rect` o `rombo`). El paso con `rama: "No"` va al costado y vuelve al paso `vuelveA`.
-  - `control`: límites (`lic`, `centro`, `lsc`), `meta`, los `puntos` diarios y las `senales` (día, regla, fuente de variación).
-  - `muestreo`: tamaño del lote, dañados y los límites aceptables de costo y riesgo.
+- Mesa de Datos: todos los datos fijos están en la llamada a `Juego.mesa({...})` de `juego2.html` y salen de la segunda entrega corregida. Las estaciones siguen el orden de la entrega (flujo → causa y efecto → Pareto → control y muestreo), una sección por estación:
+  - `flujo` (Figura 1): los `pasos`, cada uno con `id`, `texto`, `forma` (`ovalo`, `rect` o `rombo`), `col` y `fila` en la grilla; los que tienen `fijo: true` ya vienen puestos y el resto se completa en el orden de la lista. Las `conexiones` dicen de qué paso a qué paso va cada flecha, por qué lado sale y entra (`abajo`, `arriba`, `derecha`, `izquierda`), su `etiqueta` (Sí/No) y si es parte del `bucle` de reintento.
+  - `causas` (Figura 2): las `ramas` de la espina, una `pista` por rama y las `tarjetas` (`texto` y `rama` correcta).
+  - `conteo` (Cuadro 2): motivos con su `cantidad` del mes y cuántos tickets se clasifican a mano (`aMano`). El punto correcto del Pareto es el acumulado más cercano al 80 %.
+  - `control` (apartado 3.5): límites (`lic`, `centro`, `lsc`), `meta`, los `puntos` semanales y las `senales` (semana, regla y causa especial). Al final se arma el histograma con los mismos puntos.
+  - `muestreo` (apartado 3.5-IV): tamaño del lote, unidades con defecto y límites aceptables de costo y riesgo.
 
 ## Plan B para la muestra
 
