@@ -13,7 +13,7 @@ calidad-en-juego/
 ├── juego1.html     Gestión de la Calidad ("La Cinta de Calidad")
 ├── juego2.html     Herramientas de Calidad ("Mesa de Datos")
 ├── juego3.html     Normas ISO y Mantenimiento (preguntas con explicación)
-├── css/styles.css  Estilos generales (incluye la banda y el panel de los juegos grandes)
+├── css/styles.css  Estilos
 ├── css/cinta.css   Estilos de La Cinta de Calidad
 ├── css/mesa.css    Estilos de Mesa de Datos
 ├── js/common.js    Motores de juego (Juego.quiz y Juego.pares)
