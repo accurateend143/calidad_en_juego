@@ -11,12 +11,14 @@ Sitio estático: HTML + CSS + JavaScript, sin servidor ni dependencias.
 calidad-en-juego/
 ├── index.html      Inicio con los tres juegos
 ├── juego1.html     Gestión de la Calidad ("La Cinta de Calidad")
-├── juego2.html     Herramientas de Calidad (¿qué herramienta usar?)
+├── juego2.html     Herramientas de Calidad ("Mesa de Datos")
 ├── juego3.html     Normas ISO y Mantenimiento (preguntas con explicación)
-├── css/styles.css  Estilos
+├── css/styles.css  Estilos generales (incluye la banda y el panel de los juegos grandes)
 ├── css/cinta.css   Estilos de La Cinta de Calidad
+├── css/mesa.css    Estilos de Mesa de Datos
 ├── js/common.js    Motores de juego (Juego.quiz y Juego.pares)
-└── js/cinta.js     Motor de La Cinta de Calidad (Juego.cinta)
+├── js/cinta.js     Motor de La Cinta de Calidad (Juego.cinta)
+└── js/mesa.js      Motor de Mesa de Datos (Juego.mesa)
 ```
 
 ## Probarlo en tu compu
@@ -42,6 +44,12 @@ Las preguntas están dentro de cada archivo `juegoN.html`, en la llamada a `Jueg
 - Quiz: cada pregunta tiene `texto`, `opciones`, `correcta` (posición de la opción correcta, empezando en 0) y `explicacion`.
 - Pares: cada par es `["Concepto", "Definición"]`.
 - La Cinta de Calidad: los textos (estaciones, rondas, dimensiones, pasos del ciclo, hitos y mensaje final) están en la llamada a `Juego.cinta({...})` de `juego1.html`.
+- Mesa de Datos: todos los datos fijos están en la llamada a `Juego.mesa({...})` de `juego2.html`, una sección por estación:
+  - `conteo`: motivos de falla con su `cantidad` (definen el histograma y el Pareto) y cuántos tickets se clasifican a mano (`aMano`).
+  - `causas`: las `ramas` de la espina y las `tarjetas` (`texto`, `rama` correcta y `pista` si se equivoca).
+  - `flujo`: los `pasos` en orden, con su `forma` (`ovalo`, `rect` o `rombo`). El paso con `rama: "No"` va al costado y vuelve al paso `vuelveA`.
+  - `control`: límites (`lic`, `centro`, `lsc`), `meta`, los `puntos` diarios y las `senales` (día, regla, fuente de variación).
+  - `muestreo`: tamaño del lote, dañados y los límites aceptables de costo y riesgo.
 
 ## Plan B para la muestra
 

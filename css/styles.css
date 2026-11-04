@@ -203,6 +203,33 @@ button.ficha.seleccionada { border-color: var(--primary); background: #eef4ff; }
 button.ficha.hecha { border-color: var(--ok); background: var(--ok-bg); cursor: default; }
 button.ficha.error { border-color: var(--bad); background: var(--bad-bg); }
 
+/* Página de un juego grande: banda de color arriba y el panel encima */
+.pagina-juego {
+  background-color: #e9eff8;
+  background-image: radial-gradient(#d2dced 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+.banda {
+  padding: 18px 16px 88px;
+  color: #fff;
+  background-color: var(--primary-dark);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.09' stroke-width='2'%3E%3Crect x='8' y='10' width='20' height='20' rx='2'/%3E%3Cpath d='M8 17h9'/%3E%3Crect x='44' y='42' width='16' height='16' rx='2'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.banda-contenido { max-width: 1068px; margin: 0 auto; }
+.banda .volver { margin-bottom: 6px; color: #cfe0ff; }
+.banda h1 { margin: 0 0 4px; font-size: clamp(1.6rem, 4.5vw, 2.4rem); }
+.banda p { margin: 0; color: #cfe0ff; }
+
+.contenedor-juego { max-width: 1100px; margin-top: -68px; padding-top: 0; padding-bottom: 0; }
+
+.panel-juego {
+  padding: clamp(14px, 3vw, 28px);
+  border: 0;
+  box-shadow: 0 12px 32px rgba(23, 87, 189, 0.14);
+}
+
 footer.sitio {
   text-align: center;
   color: var(--muted);

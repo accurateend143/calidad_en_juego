@@ -3,73 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Herramientas de Calidad · Calidad en juego</title>
+  <title>Mesa de Datos · Calidad en juego</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/mesa.css">
 </head>
-<body>
-  <div class="contenedor">
-    <a class="volver" href="index.html">← Volver al inicio</a>
-    <section class="panel">
-      <h1>🛠️ Herramientas de Calidad</h1>
-      <p class="consigna">Elegí la herramienta que mejor resuelve cada situación.</p>
+<body class="pagina-juego">
+  <header class="banda">
+    <div class="banda-contenido">
+      <a class="volver" href="index.html">← Volver al inicio</a>
+      <h1>📊 Mesa de Datos</h1>
+      <p>Herramientas de Calidad · 4 estaciones cortas. Se juega arrastrando o tocando.</p>
+    </div>
+  </header>
+
+  <main class="contenedor contenedor-juego">
+    <section class="panel panel-juego">
       <div id="juego"></div>
     </section>
-  </div>
+  </main>
 
-  <script src="js/common.js"></script>
+  <footer class="sitio">Instituto La Salette · 6° Computación · Muestra de fin de año</footer>
+
+  <script src="js/mesa.js"></script>
   <script>
-    Juego.quiz({
+    /* Ajustar estos datos para que coincidan con la segunda entrega corregida.
+       Las cifras son simuladas y fijas: el resultado del Pareto es siempre el mismo. */
+    Juego.mesa({
       contenedor: "juego",
-      preguntas: [
-        {
-          texto: "Una fábrica quiere descubrir qué pocas causas generan la mayoría de sus defectos. ¿Qué usa?",
-          opciones: ["Gráfico de Pareto", "Diagrama de flujo", "Hoja de verificación", "Diagrama de dispersión"],
-          correcta: 0,
-          explicacion: "El gráfico de Pareto ordena las causas de mayor a menor y muestra que unas pocas explican la mayor parte del problema (regla 80/20)."
-        },
-        {
-          texto: "Se rompen muchos envases y el equipo quiere ordenar las posibles causas por categorías: mano de obra, máquina, método, material. ¿Qué usa?",
-          opciones: ["Histograma", "Diagrama de causa y efecto (Ishikawa)", "Gráfico de control", "Diagrama de flujo"],
-          correcta: 1,
-          explicacion: "El diagrama de causa y efecto, también llamado espina de pescado, organiza las causas posibles de un problema por categorías."
-        },
-        {
-          texto: "Necesitan representar paso a paso cómo se prepara un pedido, de principio a fin. ¿Qué usan?",
-          opciones: ["Gráfico de Pareto", "Hoja de verificación", "Diagrama de flujo", "Histograma"],
-          correcta: 2,
-          explicacion: "El diagrama de flujo muestra la secuencia de pasos de un proceso con símbolos y flechas."
-        },
-        {
-          texto: "Quieren anotar con simples marcas cuántas veces ocurre cada tipo de defecto mientras se produce. ¿Qué usan?",
-          opciones: ["Diagrama de dispersión", "Hoja de verificación", "Gráfico de control", "Diagrama de Ishikawa"],
-          correcta: 1,
-          explicacion: "La hoja de verificación sirve para recolectar datos de forma ordenada y sencilla en el momento en que ocurren."
-        },
-        {
-          texto: "¿Aumentan los defectos cuando sube la temperatura del horno? Quieren ver la relación entre dos variables. ¿Qué usan?",
-          opciones: ["Histograma", "Diagrama de flujo", "Gráfico de Pareto", "Diagrama de dispersión"],
-          correcta: 3,
-          explicacion: "El diagrama de dispersión grafica pares de datos para ver si existe relación entre dos variables."
-        },
-        {
-          texto: "Quieren ver cómo se distribuyen los pesos de 200 paquetes, agrupados por rangos en barras. ¿Qué usan?",
-          opciones: ["Histograma", "Hoja de verificación", "Diagrama de Ishikawa", "Diagrama de flujo"],
-          correcta: 0,
-          explicacion: "El histograma muestra la distribución de un conjunto de datos agrupándolos en intervalos."
-        },
-        {
-          texto: "Quieren seguir una medida del proceso a lo largo del tiempo, con límites superior e inferior, para detectar cuándo se descontrola. ¿Qué usan?",
-          opciones: ["Gráfico de Pareto", "Gráfico de control", "Diagrama de dispersión", "Hoja de verificación"],
-          correcta: 1,
-          explicacion: "El gráfico de control sigue el comportamiento de un proceso en el tiempo y avisa cuando se sale de los límites establecidos."
-        }
+      intro: "Sos analista de calidad de Andreani y tenés que descubrir por qué fallan las entregas domiciliarias. En cada estación usás una herramienta distinta.",
+      aviso: "Juego con fines educativos. Los datos son simulados y no describen la operación real de Andreani.",
+
+      /* Barra de progreso y resumen final: qué información dio cada herramienta */
+      etapas: [
+        { corto: "Contar", icono: "barras", herramientas: "Lista de verificación, histograma y Pareto", frase: "Cuántas veces pasa cada falla y cuáles son las pocas que explican casi todo el problema." },
+        { corto: "Causas", icono: "espina", herramientas: "Diagrama de causa y efecto", frase: "Las posibles causas de la entrega fallida, organizadas por categoría." },
+        { corto: "Proceso", icono: "flechas", herramientas: "Diagrama de flujo", frase: "La secuencia del reparto, sus decisiones y el bucle de reintento donde el problema se repite." },
+        { corto: "Control", icono: "control", herramientas: "Gráfico de control y muestreo", frase: "Si el proceso está estable o hay una señal, y cuánto conviene revisar sin gastar de más." }
       ],
-      repaso: [
-        "Pareto: prioriza las pocas causas más importantes.",
-        "Ishikawa: organiza las causas de un problema.",
-        "Diagrama de flujo: describe los pasos de un proceso.",
-        "Hoja de verificación, histograma, dispersión y gráfico de control: recolectan y analizan datos."
-      ]
+
+      conteo: {
+        titulo: "Estación 1 · Contar y ordenar",
+        herramientas: "Lista de verificación, histograma y gráfico de Pareto",
+        consigna: "Llegaron los tickets de las entregas fallidas. Poné cada uno en el casillero de su motivo, ordená las barras y encontrá los pocos motivos que explican casi todo.",
+        aMano: 12, /* tickets que se clasifican a mano antes de ofrecer cargar el resto */
+        motivos: [
+          { nombre: "Destinatario ausente", corto: "Ausente", cantidad: 14 },
+          { nombre: "Dirección incorrecta", corto: "Dirección", cantidad: 7 },
+          { nombre: "Domicilio sin acceso", corto: "Sin acceso", cantidad: 4 },
+          { nombre: "Paquete rechazado", corto: "Rechazo", cantidad: 2 },
+          { nombre: "Sin motivo registrado", corto: "Sin motivo", cantidad: 9, alerta: true }
+        ],
+        nota: "Ojo con «Sin motivo registrado»: es la segunda barra más alta. No anotar por qué falló cada visita ya es un problema, porque sin ese dato no se puede atacar la causa.",
+        aprendizaje: "la lista de verificación cuenta, el histograma muestra cómo se reparten los datos y el Pareto prioriza: unos pocos motivos explican la mayor parte de las fallas."
+      },
+
+      causas: {
+        titulo: "Estación 2 · Buscar la causa",
+        herramientas: "Diagrama de causa y efecto (espina de pescado)",
+        consigna: "Cada tarjeta es una posible causa de las entregas fallidas. Ponela en la espina de su categoría.",
+        efecto: "Entrega fallida",
+        ramas: ["Personas", "Métodos", "Equipos", "Información", "Entorno", "Medición"],
+        tarjetas: [
+          { texto: "Repartidores nuevos que no conocen la zona", rama: "Personas", pista: "pensá en quién hace la tarea." },
+          { texto: "Hoja de ruta armada sin ordenar por zona", rama: "Métodos", pista: "es la forma en que se organiza el trabajo." },
+          { texto: "Escáner de mano que se queda sin batería", rama: "Equipos", pista: "es una herramienta o máquina." },
+          { texto: "No se avisa bien la franja horaria", rama: "Información", pista: "tiene que ver con lo que se le comunica al cliente." },
+          { texto: "Dirección cargada incompleta en el sistema", rama: "Información", pista: "es un dato que llega mal." },
+          { texto: "Pico de demanda por temporada", rama: "Entorno", pista: "es algo que pasa afuera y no depende del depósito." },
+          { texto: "Lluvias y calles cortadas", rama: "Entorno", pista: "es algo que pasa afuera y no depende del depósito." },
+          { texto: "No se registra el motivo de la visita fallida", rama: "Medición", pista: "tiene que ver con qué datos se anotan y se miden." }
+        ],
+        aprendizaje: "el diagrama de causa y efecto ayuda a buscar el origen del problema, no solo a describirlo, y casi siempre hay causas en más de una rama."
+      },
+
+      flujo: {
+        titulo: "Estación 3 · Ver el proceso",
+        herramientas: "Diagrama de flujo",
+        consigna: "Armá el proceso de distribución conectando los pasos en orden. Cada casillero tiene la forma del símbolo que le corresponde.",
+        /* forma: "ovalo" (inicio y fin), "rect" (tarea) o "rombo" (decisión).
+           El paso con rama "No" va al costado y vuelve al paso vuelveA (posición en esta lista, empezando en 0). */
+        pasos: [
+          { texto: "Llega el paquete", forma: "ovalo" },
+          { texto: "Recepción", forma: "rect" },
+          { texto: "Clasificación y hoja de ruta", forma: "rect" },
+          { texto: "Carga", forma: "rect" },
+          { texto: "Visita al domicilio", forma: "rect" },
+          { texto: "¿Está el destinatario?", forma: "rombo" },
+          { texto: "Entrega", forma: "ovalo", rama: "Sí" },
+          { texto: "Reintento otro día", forma: "rect", rama: "No", vuelveA: 4 }
+        ],
+        cartel: "Cada vuelta por acá cuesta tiempo, kilómetros y reclamos.",
+        aprendizaje: "cada símbolo tiene su función (óvalo: inicio y fin, rectángulo: tarea, rombo: decisión), y el diagrama de flujo deja ver el lugar donde el problema se repite."
+      },
+
+      control: {
+        titulo: "Estación 4a · Controlar el proceso",
+        herramientas: "Gráfico de control",
+        consigna: "Cada punto es el porcentaje de entregas exitosas de un día. Tocá «Frená y revisá» cuando el proceso se salga de control: un punto fuera de los límites o 7 puntos seguidos en baja.",
+        escala: [84, 100],
+        lic: 88, centro: 92, lsc: 96,
+        meta: 95,
+        intervalo: 0.9, /* segundos entre puntos */
+        ventana: 3,     /* puntos que se pueden dejar pasar antes de que sea tarde */
+        puntos: [
+          92.4, 91.1, 93.0, 92.2, 90.8, 93.5, 92.0, 91.6, 93.1, 92.7,
+          86.5, 92.9, 91.4, 92.6, 93.8, 91.9, 94.0, 93.3, 92.5, 91.7,
+          90.9, 90.0, 89.2, 92.3, 91.8, 92.6, 85.9, 92.1, 93.0, 91.5
+        ],
+        senales: [
+          { dia: 11, regla: "Un punto por debajo del límite inferior.", fuente: "Pico estacional", detalle: "Llegó el doble de paquetes por una fecha especial y no alcanzaron los repartidores." },
+          { dia: 23, racha: 7, regla: "Siete días seguidos en baja.", fuente: "Cambio de personal", detalle: "Entraron repartidores nuevos que todavía no conocen la zona." },
+          { dia: 27, regla: "Un punto por debajo del límite inferior.", fuente: "Clima", detalle: "Una tormenta dejó calles anegadas y muchos domicilios sin acceso." }
+        ],
+        aprendizaje: "todo proceso varía. El gráfico de control separa la variación normal de una señal de alarma, y compara el resultado obtenido con la meta."
+      },
+
+      muestreo: {
+        titulo: "Estación 4b · Revisar una muestra",
+        herramientas: "Muestreo de aceptación",
+        consigna: "Llegó un lote de 100 paquetes. Elegí cuántos revisar: si en la muestra aparece algún dañado, se rechaza el lote entero.",
+        lote: 100,
+        defectuosos: 5,
+        min: 5,
+        inicial: 10,
+        costoMax: 50,  /* % del lote: más que esto es caro */
+        riesgoMax: 20, /* % de probabilidad de aceptar un lote con dañados */
+        semilla: 7,
+        aprendizaje: "revisar una muestra puede ser más razonable que revisar el total: hay que equilibrar el costo de revisar con el riesgo de dejar pasar defectos."
+      },
+
+      niveles: ["Principiante", "Analista", "Experto"],
+      fuera: "Quedó afuera el diagrama de dispersión, que muestra si dos variables se mueven juntas (por ejemplo, volumen de envíos y entregas fallidas).",
+      mensajeFinal: "Las herramientas de calidad permiten decidir con datos y no solo con intuición."
     });
   </script>
 </body>
