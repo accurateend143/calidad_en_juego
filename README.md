@@ -11,12 +11,14 @@ Sitio estático: HTML + CSS + JavaScript, sin servidor ni dependencias.
 calidad-en-juego/
 ├── index.html      Inicio con los tres juegos
 ├── juego1.html     Gestión de la Calidad ("La Cinta de Calidad")
-├── juego2.html     Herramientas de Calidad (¿qué herramienta usar?)
+├── juego2.html     Herramientas de Calidad ("Mesa de Datos")
 ├── juego3.html     Normas ISO y Mantenimiento (preguntas con explicación)
 ├── css/styles.css  Estilos
 ├── css/cinta.css   Estilos de La Cinta de Calidad
+├── css/mesa.css    Estilos de Mesa de Datos
 ├── js/common.js    Motores de juego (Juego.quiz y Juego.pares)
-└── js/cinta.js     Motor de La Cinta de Calidad (Juego.cinta)
+├── js/cinta.js     Motor de La Cinta de Calidad (Juego.cinta)
+└── js/mesa.js      Motor de Mesa de Datos (Juego.mesa)
 ```
 
 ## Probarlo en tu compu
@@ -42,6 +44,12 @@ Las preguntas están dentro de cada archivo `juegoN.html`, en la llamada a `Jueg
 - Quiz: cada pregunta tiene `texto`, `opciones`, `correcta` (posición de la opción correcta, empezando en 0) y `explicacion`.
 - Pares: cada par es `["Concepto", "Definición"]`.
 - La Cinta de Calidad: los textos (estaciones, rondas, dimensiones, pasos del ciclo, hitos y mensaje final) están en la llamada a `Juego.cinta({...})` de `juego1.html`.
+- Mesa de Datos: todos los datos fijos están en la llamada a `Juego.mesa({...})` de `juego2.html` y salen de la segunda entrega corregida. Las estaciones siguen el orden de la entrega (flujo → causa y efecto → Pareto → control y muestreo), una sección por estación:
+  - `flujo` (Figura 1): los `pasos`, cada uno con `id`, `texto`, `forma` (`ovalo`, `rect` o `rombo`), `col` y `fila` en la grilla; los que tienen `fijo: true` ya vienen puestos y el resto se completa en el orden de la lista. Las `conexiones` dicen de qué paso a qué paso va cada flecha, por qué lado sale y entra (`abajo`, `arriba`, `derecha`, `izquierda`), su `etiqueta` (Sí/No) y si es parte del `bucle` de reintento.
+  - `causas` (Figura 2): las `ramas` de la espina, una `pista` por rama y las `tarjetas` (`texto` y `rama` correcta).
+  - `conteo` (Cuadro 2): motivos con su `cantidad` del mes y cuántos tickets se clasifican a mano (`aMano`). El punto correcto del Pareto es el acumulado más cercano al 80 %.
+  - `control` (apartado 3.5): límites (`lic`, `centro`, `lsc`), `meta`, los `puntos` semanales y las `senales` (semana, regla y causa especial). Al final se arma el histograma con los mismos puntos.
+  - `muestreo` (apartado 3.5-IV): tamaño del lote, unidades con defecto y límites aceptables de costo y riesgo.
 
 ## Plan B para la muestra
 
