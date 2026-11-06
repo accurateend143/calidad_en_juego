@@ -1,99 +1,1146 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>La Cinta de Calidad · Calidad en juego</title>
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/cinta.css">
-</head>
-<body class="pagina-juego">
-  <header class="banda">
-    <div class="banda-contenido">
-      <a class="volver" href="index.html">← Volver al inicio</a>
-      <h1>📦 La Cinta de Calidad</h1>
-      <p>Gestión de la Calidad · 4 rondas cortas. Se juega arrastrando o tocando.</p>
-    </div>
-  </header>
+/* Minijuego 3 "Guardia de Mantenimiento": Juego.guardia */
+(function () {
+  "use strict";
 
-  <main class="contenedor contenedor-juego">
-    <section class="panel panel-juego">
-      <div id="juego"></div>
-    </section>
-  </main>
+  var SVGNS = "http://www.w3.org/2000/svg";
 
-  <footer class="sitio">Instituto La Salette · 6° Computación · Muestra de fin de año</footer>
+  var ICONOS = {
+    cables: '<path d="M9 2v5M15 2v5"/><path d="M6 7h12v4a6 6 0 0 1-12 0z"/><path d="M12 17v5"/>',
+    plan: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/>',
+    reloj: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+    balance: '<path d="M12 3v18M7 21h10"/><path d="M4 7h16"/><path d="M4 7l-2.5 6a3 3 0 0 0 5 0zM20 7l-2.5 6a3 3 0 0 0 5 0z"/>',
+    sello: '<circle cx="12" cy="9" r="6"/><path d="M9 14l-2 7 5-3 5 3-2-7"/>',
+    sonido: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/>',
+    silencio: '<path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>'
+  };
 
-  <script src="js/cinta.js"></script>
-  <script>
-    /* Ajustar estos textos para que coincidan con la primera entrega corregida */
-    Juego.cinta({
-      contenedor: "juego",
-      intro: "Manejá una cinta de paquetes en un centro logístico de Andreani. En cada ronda, la calidad se piensa de otra forma.",
-      aviso: "Juego con fines educativos. Los datos son simulados y no describen la operación real de Andreani.",
-      estaciones: ["Recepción", "Clasificación", "Carga"],
-      rondas: [
-        {
-          titulo: "Ronda 1 · Inspección",
-          consigna: "Sos el inspector al final de la cinta. Arrastrá al tacho (o tocá) los paquetes con marca roja.",
-          aprendizaje: "controlar solo al final detecta el problema tarde, tira trabajo ya hecho y no evita que el defecto vuelva a aparecer."
-        },
-        {
-          titulo: "Ronda 2 · Control y aseguramiento",
-          consigna: "Tenés 2 lupas. Ponelas en las estaciones donde nacen los defectos para corregirlos ahí.",
-          aprendizaje: "controlar el proceso, y no solo el resultado, baja el costo. Los datos te dicen dónde mirar."
-        },
-        {
-          titulo: "Ronda 3 · Calidad Total",
-          consigna: "Dale equipo a las tres estaciones, mejorá las que tienen problemas y respondé lo que pide el cliente.",
-          aprendizaje: "la calidad se construye entre todos, empieza por entender qué quiere el cliente y tiene más de una dimensión."
-        },
-        {
-          titulo: "Ronda 4 · Mejora continua",
-          consigna: "El ciclo PHVA resuelve un problema en 4 fases: Planificar, Hacer, Verificar y Actuar. En cada fase, elegí la acción que corresponde.",
-          aprendizaje: "la meta se mueve: mejorar nunca termina."
+  function el(tag, clase, texto) {
+    var e = document.createElement(tag);
+    if (clase) e.className = clase;
+    if (texto !== undefined) e.textContent = texto;
+    return e;
+  }
+
+  function svg(tag, attrs) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  }
+
+  function icono(nombre) {
+    var s = svg("svg", { viewBox: "0 0 24 24", "aria-hidden": "true", "class": "gm-icono" });
+    s.innerHTML = ICONOS[nombre] || "";
+    return s;
+  }
+
+  function boton(texto, alTocar) {
+    var b = el("button", "btn", texto);
+    b.type = "button";
+    b.addEventListener("click", alTocar);
+    return b;
+  }
+
+  function mezclar(lista) {
+    var a = lista.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function sumar(lista) {
+    return lista.reduce(function (a, b) { return a + b; }, 0);
+  }
+
+  /* Suma los montos de una lista de [concepto, monto] */
+  function montos(lista) {
+    return sumar((lista || []).map(function (x) { return x[1]; }));
+  }
+
+  /* $4.200.000, sin depender de la configuración regional del navegador */
+  function plata(n) {
+    var s = String(Math.abs(Math.round(n))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return (n < 0 ? "−$" : "$") + s;
+  }
+
+  function decimal(n) {
+    return (Math.round(n * 10) / 10).toString().replace(".", ",");
+  }
+
+  function lista(nombres) {
+    if (nombres.length < 2) return nombres.join("");
+    return nombres.slice(0, -1).join(", ") + " y " + nombres[nombres.length - 1];
+  }
+
+  /* Posición de un elemento relativa a otro */
+  function caja(elem, base) {
+    var r = elem.getBoundingClientRect();
+    var b = base.getBoundingClientRect();
+    var c = { l: r.left - b.left, t: r.top - b.top, w: r.width, h: r.height };
+    c.r = c.l + c.w; c.b = c.t + c.h; c.cx = c.l + c.w / 2; c.cy = c.t + c.h / 2;
+    return c;
+  }
+
+  /* Redibuja algo cuando cambia el tamaño de la ventana, mientras el elemento siga en pantalla */
+  function alRedimensionar(elem, fn) {
+    function f() {
+      if (!elem.isConnected) { window.removeEventListener("resize", f); return; }
+      fn();
+    }
+    window.addEventListener("resize", f);
+  }
+
+  function crearSonido() {
+    var ctx = null;
+    var activo = true;
+    function tono(frecuencia, duracion, demora, volumen) {
+      if (!activo) return;
+      try {
+        ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+        var t = ctx.currentTime + (demora || 0);
+        var o = ctx.createOscillator();
+        var g = ctx.createGain();
+        o.frequency.value = frecuencia;
+        g.gain.setValueAtTime(volumen || 0.1, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + duracion);
+        o.connect(g);
+        g.connect(ctx.destination);
+        o.start(t);
+        o.stop(t + duracion);
+      } catch (e) { /* el navegador no permite sonido: se juega igual */ }
+    }
+    return {
+      tic: function () { tono(1040, 0.05, 0, 0.05); },
+      bien: function () { tono(660, 0.12); tono(880, 0.16, 0.09); },
+      mal: function () { tono(196, 0.3); },
+      alarma: function () { tono(520, 0.12); tono(390, 0.2, 0.12); },
+      activo: function () { return activo; },
+      alternar: function () { activo = !activo; return activo; }
+    };
+  }
+
+  /* Arrastrar y soltar con mouse o dedo. Un toque sin arrastrar llega a alTocar.
+     Con op.cable no se crea una copia: el juego dibuja el cable con alMover. */
+  function activarArrastre(contenedor, op) {
+    var actual = null;
+    var ultimoArrastre = 0;
+    var ultimoToque = null;
+
+    function destinoEn(x, y) {
+      var pila = document.elementsFromPoint(x, y);
+      for (var i = 0; i < pila.length; i++) {
+        var d = pila[i].closest("[data-drop]");
+        if (d && contenedor.contains(d) && (!actual || d !== actual.fuente)) return d;
+      }
+      return null;
+    }
+
+    function marcar(destino) {
+      if (actual.sobre === destino) return;
+      if (actual.sobre) actual.sobre.classList.remove("sobre");
+      actual.sobre = destino;
+      if (destino) destino.classList.add("sobre");
+    }
+
+    function mover(ev) {
+      if (!actual || ev.pointerId !== actual.id) return;
+      if (!actual.arrastrando) {
+        if (Math.abs(ev.clientX - actual.x0) + Math.abs(ev.clientY - actual.y0) < 8) return;
+        actual.arrastrando = true;
+        if (!op.cable) {
+          var r = actual.fuente.getBoundingClientRect();
+          actual.fantasma = actual.fuente.cloneNode(true);
+          actual.fantasma.classList.add("gm-fantasma");
+          actual.fantasma.style.width = r.width + "px";
+          actual.fantasma.style.height = r.height + "px";
+          document.body.appendChild(actual.fantasma);
+          actual.fuente.classList.add("levantado");
         }
-      ],
-      mejoras: [
-        { nombre: "Capacitación", icono: "libro" },
-        { nombre: "Procedimiento claro", icono: "lista" },
-        { nombre: "Aviso del cliente", icono: "charla" }
-      ],
-      dimensiones: [
-        { pedido: "Quiero que llegue en la fecha prometida", dimension: "Puntualidad", respuesta: "Ruta planificada", icono: "reloj" },
-        { pedido: "Quiero que llegue sin daños", dimension: "Fiabilidad / conformidad", respuesta: "Embalaje reforzado", icono: "escudo" },
-        { pedido: "Quiero saber dónde está mi paquete", dimension: "Información / seguimiento", respuesta: "Seguimiento en línea", icono: "pin" },
-        { pedido: "Quiero que me traten bien", dimension: "Atención", respuesta: "Atención amable", icono: "corazon" }
-      ],
-      pdca: {
-        fases: ["Planificar", "Hacer", "Verificar", "Actuar"],
-        significados: ["definir la meta y el plan", "probar la solución en chico", "medir si funcionó", "dejarlo como norma"],
-        /* Las acciones van en el orden de las fases: Planificar, Hacer, Verificar, Actuar */
-        problemas: [
-          {
-            titulo: "Etiquetas ilegibles",
-            acciones: ["Meta: ninguna etiqueta ilegible", "Probar una impresora nueva en un turno", "Contar las etiquetas ilegibles de ese turno", "Usar la impresora nueva en todos los turnos"]
-          },
-          {
-            titulo: "Paquetes que se demoran en la carga",
-            acciones: ["Meta: cargar cada camión en 30 minutos", "Probar ordenar los paquetes por ruta", "Medir cuánto tarda la carga", "Escribir el nuevo orden en el procedimiento"]
-          },
-          {
-            titulo: "Direcciones incompletas",
-            acciones: ["Meta: cero envíos sin dirección completa", "Probar un formulario con campos obligatorios", "Revisar cuántas direcciones llegan incompletas", "Usar el formulario nuevo con todos los clientes"]
-          }
-        ],
-        indicadorInicial: 90,
-        mejoraPorVuelta: 2
-      },
-      hitos: [
-        { titulo: "Inspección", frase: "Revisar el producto terminado y separar lo que está mal." },
-        { titulo: "Control y aseguramiento", frase: "Controlar el proceso para que el defecto no avance." },
-        { titulo: "Calidad Total", frase: "Todos participan, con el cliente en el centro." },
-        { titulo: "Mejora continua", frase: "Planificar, hacer, verificar y actuar, una y otra vez." }
-      ],
-      mensajeFinal: "La calidad no consiste solo en controlar si un producto tiene defectos: consiste en prevenirlos, entender al cliente y mejorar siempre."
+        if (op.alLevantar) op.alLevantar(actual.fuente);
+      }
+      if (actual.fantasma) {
+        actual.fantasma.style.left = ev.clientX - actual.fantasma.offsetWidth / 2 + "px";
+        actual.fantasma.style.top = ev.clientY - actual.fantasma.offsetHeight / 2 + "px";
+      }
+      var destino = destinoEn(ev.clientX, ev.clientY);
+      marcar(destino);
+      if (op.alMover) op.alMover(ev.clientX, ev.clientY, actual.fuente);
+      ev.preventDefault();
+    }
+
+    function soltar(ev) {
+      if (!actual || ev.pointerId !== actual.id) return;
+      var a = actual;
+      window.removeEventListener("pointermove", mover);
+      window.removeEventListener("pointerup", soltar);
+      window.removeEventListener("pointercancel", soltar);
+      if (!a.arrastrando) {
+        actual = null;
+        ultimoToque = { fuente: a.fuente, t: Date.now() };
+        op.alTocar(a.fuente, a.fuente.closest("[data-drop]"));
+        return;
+      }
+      var destino = ev.type === "pointerup" ? destinoEn(ev.clientX, ev.clientY) : null;
+      actual = null;
+      ultimoArrastre = Date.now();
+      if (a.fantasma) a.fantasma.remove();
+      a.fuente.classList.remove("levantado");
+      if (a.sobre) a.sobre.classList.remove("sobre");
+      op.alSoltar(a.fuente, destino);
+    }
+
+    contenedor.addEventListener("pointerdown", function (ev) {
+      if (actual || ev.button > 0) return;
+      var fuente = ev.target.closest("[data-drag]");
+      if (!fuente || !contenedor.contains(fuente) || !op.puedeArrastrar(fuente)) return;
+      actual = { fuente: fuente, id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, fantasma: null, sobre: null, arrastrando: false };
+      window.addEventListener("pointermove", mover, { passive: false });
+      window.addEventListener("pointerup", soltar);
+      window.addEventListener("pointercancel", soltar);
     });
-  </script>
-</body>
-</html>
+
+    /* Clics que no pasaron por pointerdown/up: destinos o teclado */
+    contenedor.addEventListener("click", function (ev) {
+      if (ev.target.closest(".btn")) return; /* los botones tienen su propia acción */
+      var fuente = ev.target.closest("[data-drag]");
+      if (Date.now() - ultimoArrastre < 200) return;
+      if (ultimoToque && ultimoToque.fuente === fuente && Date.now() - ultimoToque.t < 1000) {
+        ultimoToque = null;
+        return;
+      }
+      op.alTocar(fuente, ev.target.closest("[data-drop]"));
+    });
+  }
+
+  /* ---------- Simulación: los eventos son fijos, así que el resultado depende solo del plan ---------- */
+  function simular(cfg, plan) {
+    var sim = cfg.simulacion;
+    var semanas = [];
+    for (var s = 1; s <= sim.semanas; s++) {
+      var e = null;
+      sim.eventos.forEach(function (x) { if (x.semana === s) e = x; });
+      var w = { semana: s, estado: "ok", texto: sim.sinNovedades, horas: 0, directo: [], oportunidad: [], sobregasto: false, total: false, consejo: "", pieza: "" };
+      if (e) {
+        var tipo = plan[e.pieza];
+        var r = (e.especiales && e.especiales[tipo]) || (e.cubren.indexOf(tipo) >= 0 ? e.bien : e.mal);
+        w.pieza = e.pieza;
+        w.titulo = e.titulo;
+        w.estado = r.estado;
+        w.texto = r.texto;
+        w.horas = r.horas || 0;
+        w.directo = r.directo || [];
+        w.oportunidad = r.oportunidad || [];
+        w.sobregasto = !!r.sobregasto;
+        w.total = !!r.total;
+        w.consejo = r.consejo || "";
+      }
+      semanas.push(w);
+    }
+    var d = 0, o = 0;
+    semanas.forEach(function (w) { d += montos(w.directo); o += montos(w.oportunidad); });
+    return {
+      semanas: semanas,
+      directoTotal: d,
+      oportTotal: o,
+      sobregasto: semanas.some(function (w) { return w.sobregasto; }),
+      paradaTotal: semanas.some(function (w) { return w.total; })
+    };
+  }
+
+  function costoPrograma(cfg, plan) {
+    var porId = {};
+    cfg.plan.tipos.forEach(function (t) { porId[t.id] = t; });
+    return sumar(Object.keys(plan).map(function (p) { return porId[plan[p]].costo; }));
+  }
+
+  /* Máquina dibujada con bloques: el motorreductor acciona la línea de abajo */
+  function dibujarMaquina(info, modo) {
+    var m = el("div", "gm-maquina");
+    m.appendChild(el("div", "gm-maquina-titulo", info.maquina));
+    var porId = {};
+
+    function pieza(p) {
+      var d = el("div", "gm-pieza crit-" + p.criticidad);
+      d.dataset.pieza = p.id;
+      if (modo === "plan") d.setAttribute("data-drop", "pieza");
+      d.appendChild(el("span", "gm-crit", p.etiqueta));
+      d.appendChild(el("strong", "", p.nombre));
+      d.appendChild(el("small", "", p.detalle));
+      var asig = el("div", "gm-asignado");
+      d.appendChild(asig);
+      porId[p.id] = { el: d, asig: asig };
+      return d;
+    }
+
+    var fila1 = el("div", "gm-fila-motor");
+    var fila2 = el("div", "gm-fila-flujo");
+    info.piezas.forEach(function (p) { (p.principal ? fila1 : fila2).appendChild(pieza(p)); });
+    m.appendChild(fila1);
+    m.appendChild(el("div", "gm-acciona", "↓ acciona toda la línea"));
+    m.appendChild(fila2);
+    return { el: m, piezas: porId };
+  }
+
+  /* Iceberg: la punta (costos directos) se ve, lo de abajo está tapado por la niebla */
+  function crearIceberg(etiquetas) {
+    var r = el("div", "gm-iceberg");
+    var aire = el("div", "gm-aire");
+    aire.appendChild(el("div", "gm-triangulo"));
+    var punta = el("div", "gm-punta");
+    punta.appendChild(el("span", "", etiquetas.directo));
+    var vd = el("b", "", "$0");
+    punta.appendChild(vd);
+    aire.appendChild(punta);
+    r.appendChild(aire);
+    var agua = el("div", "gm-agua");
+    var sub = el("div", "gm-sumergido");
+    sub.appendChild(el("span", "", etiquetas.oportunidad));
+    var vo = el("b", "", "$ ? ? ?");
+    sub.appendChild(vo);
+    agua.appendChild(sub);
+    var niebla = el("div", "gm-niebla");
+    niebla.appendChild(el("span", "", etiquetas.niebla));
+    agua.appendChild(niebla);
+    r.appendChild(agua);
+    return {
+      el: r,
+      directo: function (n) { vd.textContent = plata(n); },
+      revelar: function (n) {
+        vo.textContent = plata(n);
+        r.classList.add("revelado");
+      }
+    };
+  }
+
+  function guardia(cfg) {
+    var raiz = document.getElementById(cfg.contenedor);
+    var sonido = crearSonido();
+    var errores = 0;
+    var plan = {};
+    var res = null;
+    var auditoriaOk = false;
+
+    var FASES = [
+      { clave: "normas", etapa: 0, jugar: jugarNormas },
+      { clave: "plan", etapa: 1, jugar: jugarPlan },
+      { clave: "simulacion", etapa: 2, jugar: jugarSimulacion },
+      { clave: "balance", etapa: 3, jugar: jugarBalance, sinIntro: true },
+      { clave: "auditoria", etapa: 4, jugar: jugarAuditoria }
+    ];
+
+    portada();
+
+    function portada() {
+      raiz.innerHTML = "";
+      var c = el("div", "gm-portada");
+      c.appendChild(el("p", "gm-intro", cfg.intro));
+      var ol = el("ol", "gm-portada-etapas");
+      cfg.etapas.forEach(function (e, k) {
+        var li = el("li");
+        li.appendChild(icono(e.icono));
+        li.appendChild(el("span", "", k + 1 + ". " + e.corto));
+        ol.appendChild(li);
+      });
+      c.appendChild(ol);
+      c.appendChild(el("p", "gm-aviso", cfg.aviso));
+      c.appendChild(boton("Empezar", function () { empezar(0); }));
+      raiz.appendChild(c);
+    }
+
+    function empezar(desde) {
+      if (desde === 0) errores = 0;
+      plan = {};
+      res = null;
+      auditoriaOk = false;
+      fase(desde);
+    }
+
+    function fase(i) {
+      var f = FASES[i];
+      var info = cfg[f.clave];
+      var ui = armarPantalla(f.etapa, info.titulo);
+      var arrancar = f.jugar(ui, info, terminar, fase);
+      if (f.sinIntro) arrancar();
+      else tarjeta(ui, [el("h2", "", info.titulo), el("p", "gm-tema", info.tema), el("p", "", info.consigna)], "Empezar", arrancar);
+
+      function terminar(resumen) {
+        sonido.bien();
+        var ultima = i === FASES.length - 1;
+        var ap = el("p", "gm-aprendizaje");
+        ap.appendChild(el("strong", "", "Lo que descubriste: "));
+        ap.appendChild(document.createTextNode(info.aprendizaje));
+        tarjeta(ui, [el("h2", "", "✓ " + info.titulo), el("p", "gm-resumen", resumen), ap],
+          info.siguiente || (ultima ? "Ver el resultado" : "Siguiente"),
+          function () { if (ultima) cierre(); else fase(i + 1); });
+      }
+    }
+
+    function armarPantalla(etapa, titulo) {
+      raiz.innerHTML = "";
+      var ui = {};
+      ui.raiz = el("div", "gm");
+
+      var prog = el("ol", "gm-progreso");
+      prog.setAttribute("aria-label", "Parte " + (etapa + 1) + " de " + cfg.etapas.length);
+      cfg.etapas.forEach(function (e, k) {
+        var li = el("li", k < etapa ? "hecha" : k === etapa ? "actual" : "");
+        li.appendChild(icono(e.icono));
+        li.appendChild(el("span", "", e.corto));
+        prog.appendChild(li);
+      });
+      ui.raiz.appendChild(prog);
+
+      var hud = el("div", "gm-hud");
+      hud.appendChild(el("strong", "gm-titulo", titulo));
+      ui.datos = el("div", "gm-datos");
+      hud.appendChild(ui.datos);
+      var bs = el("button", "gm-sonido");
+      bs.type = "button";
+      function pintarSonido(activo) {
+        bs.innerHTML = "";
+        bs.appendChild(icono(activo ? "sonido" : "silencio"));
+        bs.setAttribute("aria-label", activo ? "Silenciar" : "Activar sonido");
+      }
+      pintarSonido(sonido.activo());
+      bs.addEventListener("click", function () { pintarSonido(sonido.alternar()); });
+      hud.appendChild(bs);
+      ui.raiz.appendChild(hud);
+
+      ui.escenario = el("div", "gm-escenario");
+      ui.raiz.appendChild(ui.escenario);
+      ui.mensaje = el("p", "gm-mensaje");
+      ui.mensaje.setAttribute("aria-live", "polite");
+      ui.raiz.appendChild(ui.mensaje);
+      ui.bandeja = el("div", "gm-bandeja");
+      ui.raiz.appendChild(ui.bandeja);
+      ui.tarjeta = el("div", "gm-tarjeta");
+      ui.tarjeta.hidden = true;
+      ui.raiz.appendChild(ui.tarjeta);
+      raiz.appendChild(ui.raiz);
+
+      ui.decir = function (texto, tipo) {
+        ui.mensaje.textContent = texto;
+        ui.mensaje.className = "gm-mensaje" + (tipo ? " " + tipo : "");
+      };
+      ui.hud = function (pares) {
+        ui.datos.innerHTML = "";
+        pares.forEach(function (p) {
+          var s = el("span", "", p[0] + " ");
+          s.appendChild(el("b", "", String(p[1])));
+          ui.datos.appendChild(s);
+        });
+      };
+      ui.sacudir = function (elem, texto) {
+        elem.classList.remove("sacudir");
+        void elem.offsetWidth;
+        elem.classList.add("sacudir");
+        sonido.mal();
+        ui.decir(texto, "mal");
+      };
+      ui.terminarCon = function (texto, accion) {
+        ui.bandeja.innerHTML = "";
+        var b = boton(texto, accion);
+        b.classList.add("gm-seguir");
+        ui.bandeja.appendChild(b);
+      };
+      return ui;
+    }
+
+    function tarjeta(ui, nodos, textoBoton, accion) {
+      ui.tarjeta.innerHTML = "";
+      var c = el("div", "gm-tarjeta-caja");
+      nodos.forEach(function (nodo) { c.appendChild(nodo); });
+      var b = boton(textoBoton, function () {
+        ui.tarjeta.hidden = true;
+        accion();
+      });
+      c.appendChild(b);
+      ui.tarjeta.appendChild(c);
+      ui.tarjeta.hidden = false;
+      if (ui.raiz.getBoundingClientRect().top < 0) ui.raiz.scrollIntoView({ block: "start" });
+      b.focus({ preventScroll: true });
+    }
+
+    /* ---------- Fase 0: conectar los cables ---------- */
+    function jugarNormas(ui, info, terminar) {
+      var pares = info.pares;
+      var hechos = 0;
+      var conectados = [];
+      var elegida = null;
+      var activo = false;
+      var temporal = null;
+
+      var cont = el("div", "gm-cables");
+      var colA = el("div", "gm-col");
+      var colB = el("div", "gm-col");
+      var capa = svg("svg", { "class": "gm-capa", "aria-hidden": "true" });
+      cont.appendChild(capa);
+      cont.appendChild(colA);
+      cont.appendChild(colB);
+      ui.escenario.appendChild(cont);
+
+      var izq = [], der = [];
+      pares.forEach(function (p, i) {
+        var b = el("button", "gm-nodo gm-izq");
+        b.type = "button";
+        b.setAttribute("data-drag", "");
+        b.dataset.i = i;
+        b.appendChild(el("strong", "", p.concepto));
+        b.appendChild(el("span", "gm-borne"));
+        izq[i] = b;
+      });
+      pares.forEach(function (p, i) {
+        var b = el("button", "gm-nodo gm-der", p.definicion);
+        b.type = "button";
+        b.setAttribute("data-drop", "cable");
+        b.dataset.i = i;
+        b.appendChild(el("span", "gm-borne"));
+        der[i] = b;
+      });
+      izq.forEach(function (b) { colA.appendChild(b); });
+      mezclar(der).forEach(function (b) { colB.appendChild(b); });
+
+      function punto(elem, lado) {
+        var c = caja(elem, cont);
+        return lado === "der" ? [c.r, c.cy] : [c.l, c.cy];
+      }
+
+      function trazo(a, b) {
+        var dx = Math.max(30, Math.abs(b[0] - a[0]) / 2);
+        return "M" + a[0] + " " + a[1] + " C" + (a[0] + dx) + " " + a[1] + " " + (b[0] - dx) + " " + b[1] + " " + b[0] + " " + b[1];
+      }
+
+      function dibujar() {
+        capa.innerHTML = "";
+        conectados.forEach(function (i) {
+          capa.appendChild(svg("path", { "class": "gm-cable", d: trazo(punto(izq[i], "der"), punto(der[i], "izq")) }));
+        });
+      }
+      alRedimensionar(cont, dibujar);
+
+      function actualizar() {
+        ui.hud([["Conectadas", hechos + " de " + pares.length], ["Errores", errores]]);
+      }
+
+      function elegir(b) {
+        if (elegida) elegida.classList.remove("elegida");
+        elegida = b;
+        if (b) {
+          b.classList.add("elegida");
+          ui.decir("Ahora tocá la definición que le corresponde.", "");
+        }
+      }
+
+      function conectar(a, b) {
+        var i = +a.dataset.i;
+        if (b.disabled) return;
+        if (+b.dataset.i === i) {
+          sonido.bien();
+          a.disabled = true; b.disabled = true;
+          a.classList.add("hecha"); b.classList.add("hecha");
+          a.removeAttribute("data-drag"); b.removeAttribute("data-drop");
+          conectados.push(i);
+          hechos++;
+          dibujar();
+          actualizar();
+          ui.decir(pares[i].bien, "bien");
+          if (hechos === pares.length) listo();
+        } else {
+          errores++;
+          actualizar();
+          ui.sacudir(b, pares[i].pista);
+        }
+      }
+
+      function listo() {
+        var s = el("div", "gm-sello");
+        s.appendChild(icono("sello"));
+        var t = el("div");
+        t.appendChild(el("p", "gm-sello-frase", info.sello.frase));
+        if (info.sello.edicion) t.appendChild(el("p", "gm-sello-nota", info.sello.edicion));
+        s.appendChild(t);
+        ui.escenario.appendChild(s);
+        ui.terminarCon("Terminar", function () { terminar(info.resumen); });
+      }
+
+      activarArrastre(ui.raiz, {
+        cable: true,
+        puedeArrastrar: function (f) { return activo && f.classList.contains("gm-izq"); },
+        alLevantar: function (f) {
+          elegir(null);
+          temporal = svg("path", { "class": "gm-cable gm-cable-temp" });
+          capa.appendChild(temporal);
+        },
+        alMover: function (x, y, f) {
+          var c = cont.getBoundingClientRect();
+          temporal.setAttribute("d", trazo(punto(f, "der"), [x - c.left, y - c.top]));
+        },
+        alSoltar: function (f, d) {
+          if (temporal) { temporal.remove(); temporal = null; }
+          if (d && d.dataset.i !== undefined && d.classList.contains("gm-der")) conectar(f, d);
+        },
+        alTocar: function (f, d) {
+          if (!activo) return;
+          if (f) { elegir(f === elegida ? null : f); return; }
+          if (d && d.classList.contains("gm-der") && elegida) {
+            var a = elegida;
+            elegir(null);
+            conectar(a, d);
+          }
+        }
+      });
+
+      actualizar();
+      return function () {
+        activo = true;
+        ui.decir("Arrastrá un cable desde cada tarjeta de la izquierda hasta su par de la derecha (o tocá una y después la otra).", "");
+        dibujar();
+      };
+    }
+
+    /* ---------- Fase 1: armar el plan ---------- */
+    function jugarPlan(ui, info, terminar) {
+      var tipos = {};
+      info.tipos.forEach(function (t) { tipos[t.id] = t; });
+      var piezas = {};
+      info.piezas.forEach(function (p) { piezas[p.id] = p; });
+      var activo = false;
+      var elegida = null;
+
+      var cartel = el("div", "gm-presupuesto");
+      var cartelTexto = el("div", "gm-presupuesto-texto");
+      var cartelBarra = el("div", "gm-presupuesto-barra");
+      var relleno = el("span");
+      cartelBarra.appendChild(relleno);
+      cartel.appendChild(cartelTexto);
+      cartel.appendChild(cartelBarra);
+      ui.escenario.appendChild(cartel);
+
+      var maq = dibujarMaquina(info, "plan");
+      var zonaFichas = el("div", "gm-fichas");
+      ui.escenario.appendChild(zonaFichas);
+      ui.escenario.appendChild(ui.mensaje);
+      ui.escenario.appendChild(maq.el);
+
+      /* Tabla del plan: se completa sola */
+      var tabla = el("table", "gm-tabla");
+      var cab = el("thead");
+      var fc = el("tr");
+      ["Actividad", "Tipo de mantenimiento", "Frecuencia", "Responsable"].forEach(function (t) { fc.appendChild(el("th", "", t)); });
+      cab.appendChild(fc);
+      tabla.appendChild(cab);
+      var cuerpo = el("tbody");
+      var filas = {};
+      info.piezas.forEach(function (p) {
+        var tr = el("tr");
+        var celdas = [];
+        ["Actividad", "Tipo de mantenimiento", "Frecuencia", "Responsable"].forEach(function (t) {
+          var td = el("td");
+          td.dataset.label = t;
+          tr.appendChild(td);
+          celdas.push(td);
+        });
+        filas[p.id] = celdas;
+        cuerpo.appendChild(tr);
+      });
+      tabla.appendChild(cuerpo);
+      var envoltura = el("div", "gm-tabla-caja");
+      envoltura.appendChild(el("p", "gm-tabla-titulo", "Plan de mantenimiento"));
+      envoltura.appendChild(tabla);
+      ui.escenario.appendChild(envoltura);
+
+      /* Fichas */
+      var grupo = el("div", "gm-grupo");
+      grupo.appendChild(el("div", "gm-grupo-titulo", "Fichas de mantenimiento: arrastralas a una pieza (o tocá la ficha y después la pieza)"));
+      var fichas = [];
+      info.tipos.forEach(function (t) {
+        var f = el("button", "gm-ficha tipo-" + t.id);
+        f.type = "button";
+        f.setAttribute("data-drag", "");
+        f.setAttribute("data-ficha", "");
+        f.dataset.tipo = t.id;
+        f.appendChild(el("strong", "", t.nombre));
+        f.appendChild(el("small", "", t.corto));
+        f.appendChild(el("span", "gm-costo", t.costo === 0 ? "Gratis ahora" : plata(t.costo)));
+        fichas.push(f);
+        grupo.appendChild(f);
+      });
+      zonaFichas.appendChild(grupo);
+      var seguir = boton("Simular 12 semanas", function () {
+        terminar("Plan completo. Gastaste " + plata(gastado()) + " de " + plata(info.presupuesto) + " y quedaron " + plata(info.presupuesto - gastado()) + ".");
+      });
+      seguir.classList.add("gm-seguir");
+      seguir.disabled = true;
+      ui.bandeja.appendChild(seguir);
+
+      function gastado() { return costoPrograma(cfg, plan); }
+      function cantidad() { return Object.keys(plan).length; }
+
+      function pintar() {
+        var g = gastado();
+        cartelTexto.innerHTML = "";
+        cartelTexto.appendChild(document.createTextNode("Presupuesto: te quedan "));
+        cartelTexto.appendChild(el("b", "", plata(info.presupuesto - g)));
+        cartelTexto.appendChild(document.createTextNode(" de " + plata(info.presupuesto)));
+        relleno.style.width = Math.min(100, g / info.presupuesto * 100) + "%";
+        info.piezas.forEach(function (p) {
+          var t = tipos[plan[p.id]];
+          var asig = maq.piezas[p.id].asig;
+          asig.innerHTML = "";
+          maq.piezas[p.id].el.classList.toggle("con-plan", !!t);
+          var c = filas[p.id];
+          if (!t) {
+            asig.appendChild(el("span", "gm-vacio", "Soltá una ficha acá"));
+            c.forEach(function (td) { td.textContent = "—"; td.classList.add("vacia"); });
+            return;
+          }
+          var tag = el("span", "gm-tag tipo-" + t.id, t.nombre);
+          var x = el("button", "gm-quitar", "×");
+          x.type = "button";
+          x.setAttribute("aria-label", "Quitar " + t.nombre + " de " + p.nombre);
+          x.addEventListener("click", function (ev) {
+            ev.stopPropagation();
+            delete plan[p.id];
+            sonido.tic();
+            ui.decir("Sacaste la ficha de «" + p.nombre + "».", "");
+            actualizar();
+          });
+          asig.appendChild(tag);
+          asig.appendChild(x);
+          var valores = [p.actividades[t.id], t.nombre, t.frecuencia, t.responsable];
+          c.forEach(function (td, k) { td.textContent = valores[k]; td.classList.remove("vacia"); });
+        });
+      }
+
+      function actualizar() {
+        pintar();
+        ui.hud([["Piezas con plan", cantidad() + " de " + info.piezas.length]]);
+        seguir.disabled = cantidad() < info.piezas.length;
+      }
+
+      function elegir(f) {
+        if (elegida) elegida.classList.remove("elegida");
+        elegida = f;
+        if (f) {
+          f.classList.add("elegida");
+          ui.decir(tipos[f.dataset.tipo].nombre + ": " + tipos[f.dataset.tipo].descripcion + " Ahora tocá la pieza.", "");
+        }
+      }
+
+      function asignar(idPieza, idTipo) {
+        var t = tipos[idTipo];
+        var antes = tipos[plan[idPieza]];
+        var nuevo = gastado() - (antes ? antes.costo : 0) + t.costo;
+        elegir(null);
+        if (nuevo > info.presupuesto) {
+          var queda = info.presupuesto - gastado() + (antes ? antes.costo : 0);
+          ui.sacudir(maq.piezas[idPieza].el, "No alcanza el presupuesto: " + t.nombre + " cuesta " + plata(t.costo) + " y te quedan " + plata(queda) + ". Elegí dónde vale la pena.");
+          return;
+        }
+        plan[idPieza] = idTipo;
+        sonido.tic();
+        ui.decir(piezas[idPieza].nombre + ": " + t.nombre + ". " + t.descripcion, "");
+        actualizar();
+        if (cantidad() === info.piezas.length) ui.decir("Plan completo. Revisá la tabla y, si te convence, simulá las 12 semanas. También podés cambiar fichas.", "bien");
+      }
+
+      activarArrastre(ui.raiz, {
+        puedeArrastrar: function (f) { return activo && f.hasAttribute("data-ficha"); },
+        alLevantar: function () { elegir(null); },
+        alSoltar: function (f, d) {
+          if (d && d.dataset.pieza) asignar(d.dataset.pieza, f.dataset.tipo);
+        },
+        alTocar: function (f, d) {
+          if (!activo) return;
+          if (f && f.hasAttribute("data-ficha")) { elegir(f === elegida ? null : f); return; }
+          if (d && d.dataset.pieza) {
+            if (elegida) asignar(d.dataset.pieza, elegida.dataset.tipo);
+            else ui.decir(piezas[d.dataset.pieza].nombre + ": " + piezas[d.dataset.pieza].detalle + " (" + piezas[d.dataset.pieza].etiqueta + ")", "");
+          }
+        }
+      });
+
+      actualizar();
+      return function () {
+        activo = true;
+        ui.decir("Mirá la criticidad de cada pieza. El presupuesto no alcanza para el mantenimiento más caro en todas.", "");
+      };
+    }
+
+    /* ---------- Fase 2: doce semanas ---------- */
+    function jugarSimulacion(ui, info, terminar, ir) {
+      res = simular(cfg, plan);
+      var N = res.semanas.length;
+      var timer = null;
+      var k = 0;
+      var dir = 0, opo = 0;
+
+      var ol = el("ol", "gm-semanas");
+      var chips = [];
+      res.semanas.forEach(function (w) {
+        var li = el("li", "", String(w.semana));
+        li.setAttribute("aria-label", "Semana " + w.semana);
+        chips.push(li);
+        ol.appendChild(li);
+      });
+      ui.escenario.appendChild(ol);
+
+      var maq = dibujarMaquina(cfg.plan, "sim");
+      cfg.plan.piezas.forEach(function (p) {
+        var t = plan[p.id];
+        var tipo = cfg.plan.tipos.filter(function (x) { return x.id === t; })[0];
+        maq.piezas[p.id].asig.appendChild(el("span", "gm-tag tipo-" + t, tipo.nombre));
+      });
+      var estado = el("div", "gm-estado");
+      var lampara = el("span", "gm-lampara");
+      var estadoTexto = el("span", "", "Listo para arrancar");
+      estado.appendChild(lampara);
+      estado.appendChild(estadoTexto);
+      maq.el.insertBefore(estado, maq.el.children[1]);
+      ui.escenario.appendChild(maq.el);
+
+      var pila = el("div", "gm-pila");
+      var pilaCajas = el("div", "gm-pila-cajas");
+      var pilaTexto = el("span", "gm-pila-texto", "Sin bultos esperando.");
+      pila.appendChild(pilaCajas);
+      pila.appendChild(pilaTexto);
+      ui.escenario.appendChild(pila);
+
+      var evento = el("p", "gm-evento", "Apretá «Iniciar» para que corran las semanas.");
+      ui.escenario.appendChild(evento);
+
+      var carteles = el("div", "gm-carteles");
+      var ice = crearIceberg(info.iceberg);
+      carteles.appendChild(ice.el);
+      ui.escenario.appendChild(carteles);
+
+      function mostrar(i, callado) {
+        var w = res.semanas[i];
+        dir += montos(w.directo);
+        opo += montos(w.oportunidad);
+        chips[i].className = "hecha " + w.estado;
+        if (i > 0) chips[i - 1].classList.remove("ahora");
+        chips[i].classList.add("ahora");
+        maq.el.className = "gm-maquina estado-" + w.estado;
+        Object.keys(maq.piezas).forEach(function (id) {
+          maq.piezas[id].el.classList.remove("evento");
+        });
+        if (w.pieza) maq.piezas[w.pieza].el.classList.add("evento");
+        estadoTexto.textContent = w.estado === "parado" ? "PARADO" : w.estado === "atencion" ? "Con novedades" : "Procesando más de " + plata(info.bultosPorHora).slice(1) + " bultos por hora";
+        evento.textContent = "Semana " + w.semana + (w.titulo ? " · " + w.titulo + ". " : " · ") + w.texto;
+        evento.className = "gm-evento " + w.estado;
+        pilaCajas.innerHTML = "";
+        if (w.estado === "parado" && w.horas > 0) {
+          var n = Math.max(3, Math.round(w.horas * info.bultosPorHora / 1600));
+          for (var c = 0; c < n; c++) pilaCajas.appendChild(el("i"));
+          pilaTexto.textContent = "Bultos esperando frente a la máquina: " + plata(w.horas * info.bultosPorHora).slice(1);
+        } else {
+          pilaTexto.textContent = "Sin bultos esperando.";
+        }
+        ice.directo(dir);
+        ui.hud([["Semana", w.semana + " de " + N], ["Costos directos", plata(dir)]]);
+        if (!callado) { if (w.estado === "parado") sonido.alarma(); else sonido.tic(); }
+      }
+
+      function fin() {
+        clearInterval(timer);
+        ui.decir("Terminaron las 12 semanas. Fijate cuánto sumaron los costos directos. ¿Eso es todo lo que costaron las fallas?", "");
+        ui.terminarCon("Ver el balance", function () { ir(3); });
+      }
+
+      function avanzar() {
+        if (!ui.raiz.isConnected) { clearInterval(timer); return; }
+        mostrar(k);
+        k++;
+        if (k >= N) fin();
+      }
+
+      function iniciar() {
+        ui.bandeja.innerHTML = "";
+        var salto = boton("Saltar al final", function () {
+          clearInterval(timer);
+          while (k < N) { mostrar(k, true); k++; }
+          fin();
+        });
+        salto.classList.add("gm-seguir", "secundario");
+        ui.bandeja.appendChild(salto);
+        avanzar();
+        timer = setInterval(avanzar, 1500);
+      }
+
+      ui.hud([["Semana", "0 de " + N], ["Costos directos", plata(0)]]);
+      return function () {
+        ui.decir("Los eventos están programados: lo que pase depende del plan que armaste.", "");
+        var b = boton("Iniciar", iniciar);
+        b.classList.add("gm-seguir");
+        ui.bandeja.appendChild(b);
+      };
+    }
+
+    /* ---------- Fase 3: el balance ---------- */
+    function jugarBalance(ui, info, terminar, ir) {
+      var todoCorrectivo = {};
+      cfg.plan.piezas.forEach(function (p) { todoCorrectivo[p.id] = "correctivo"; });
+      var base = simular(cfg, todoCorrectivo);
+      var programa = costoPrograma(cfg, plan);
+      var dir = res.directoTotal, opo = res.oportTotal;
+      var total = dir + opo + programa;
+      var sinPlan = base.directoTotal + base.oportTotal;
+      var neto = sinPlan - total;
+
+      var ice = crearIceberg(cfg.simulacion.iceberg);
+      ice.directo(dir);
+      ui.escenario.appendChild(ice.el);
+      var detalle = el("div", "gm-detalle");
+      ui.escenario.appendChild(detalle);
+      ui.hud([]);
+
+      function renglones(tipoRes) {
+        var out = [];
+        res.semanas.forEach(function (w) {
+          (w[tipoRes] || []).forEach(function (x) { out.push(x); });
+        });
+        return out;
+      }
+
+      function columna(titulo, valor, lineas, max, clase) {
+        var c = el("div", "gm-col-costo " + clase);
+        c.appendChild(el("h3", "", titulo));
+        var barra = el("div", "gm-barra-costo");
+        var rel = el("span");
+        rel.style.width = "0%";
+        barra.appendChild(rel);
+        c.appendChild(barra);
+        c.appendChild(el("p", "gm-valor", plata(valor)));
+        var ul = el("ul");
+        lineas.forEach(function (x) { var li = el("li"); li.appendChild(el("span", "", x[0])); li.appendChild(el("b", "", plata(x[1]))); ul.appendChild(li); });
+        if (!lineas.length) ul.appendChild(el("li", "", "Sin costos de este tipo."));
+        c.appendChild(ul);
+        setTimeout(function () { rel.style.width = Math.max(2, valor / max * 100) + "%"; }, 60);
+        return c;
+      }
+
+      function revelar() {
+        sonido.bien();
+        ice.revelar(opo);
+        ui.bandeja.innerHTML = "";
+        ui.decir("", "");
+        var max = Math.max(dir, opo, 1);
+        var dos = el("div", "gm-dos-costos");
+        dos.appendChild(columna("Costos directos (lo que se ve)", dir, renglones("directo"), max, "visible"));
+        dos.appendChild(columna("Costos de oportunidad (lo oculto)", opo, renglones("oportunidad"), max, "oculto"));
+        detalle.appendChild(dos);
+
+        var frase = el("p", "gm-razon");
+        if (opo > dir && dir > 0) frase.textContent = "Lo que no se ve costó " + decimal(opo / dir) + " veces lo que se ve.";
+        else frase.textContent = "Con este plan las fallas fueron chicas, y también lo que no se ve. Probá sin predictivo en el motorreductor para ver cuánto pesa una parada total.";
+        detalle.appendChild(frase);
+
+        var cuadro = el("table", "gm-cuadro");
+        [
+          ["Costo del programa de mantenimiento (tu plan)", programa],
+          ["Fallas: costos directos", dir],
+          ["Fallas: costos de oportunidad", opo],
+          ["Total con tu plan", total, "total"],
+          ["Total si todo fuera correctivo (no prevenir nada)", sinPlan]
+        ].forEach(function (f) {
+          var tr = el("tr", f[2] || "");
+          tr.appendChild(el("td", "", f[0]));
+          tr.appendChild(el("td", "num", plata(f[1])));
+          cuadro.appendChild(tr);
+        });
+        detalle.appendChild(cuadro);
+
+        var rb = el("p", "gm-resultado " + (neto > 0 ? "gana" : neto < 0 ? "pierde" : "igual"));
+        rb.textContent = neto > 0 ? "Ahorro: " + plata(neto) + " frente a no prevenir nada."
+          : neto < 0 ? "Pérdida: " + plata(-neto) + ". Prevenir te costó más de lo que te ahorró."
+          : "Quedaste igual que sin prevenir nada.";
+        detalle.appendChild(rb);
+
+        var consejos = [];
+        res.semanas.forEach(function (w) { if (w.consejo && consejos.indexOf(w.consejo) < 0) consejos.push(w.consejo); });
+        if (consejos.length) {
+          var mej = el("div", "gm-mejoras");
+          mej.appendChild(el("h3", "", "Para mejorar el plan"));
+          var ul = el("ul");
+          consejos.forEach(function (c) { ul.appendChild(el("li", "", c)); });
+          mej.appendChild(ul);
+          detalle.appendChild(mej);
+        }
+        detalle.appendChild(el("p", "gm-mensaje-final", info.mensaje));
+
+        var acciones = el("div", "gm-acciones");
+        var otro = boton("Probar otro plan", function () { empezar(1); });
+        otro.classList.add("secundario");
+        acciones.appendChild(otro);
+        acciones.appendChild(boton("Ir a la auditoría", function () { ir(4); }));
+        detalle.appendChild(acciones);
+        detalle.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+
+      return function () {
+        ui.decir("Hasta ahora solo viste la punta del iceberg: la factura de las reparaciones. Destapá lo que estaba oculto.", "");
+        var b = boton("Destapar los costos ocultos", revelar);
+        b.classList.add("gm-seguir");
+        ui.bandeja.appendChild(b);
+      };
+    }
+
+    /* ---------- Fase 4: la auditoría ---------- */
+    function jugarAuditoria(ui, info, terminar) {
+      var activo = false;
+      var papeles = info.papeles;
+
+      var auditor = el("div", "gm-auditor");
+      var cara = svg("svg", { viewBox: "0 0 48 48", "class": "gm-auditor-cara", "aria-hidden": "true" });
+      cara.innerHTML = '<circle cx="24" cy="24" r="22" fill="#eef4ff" stroke="currentColor" stroke-width="2"/><circle cx="17" cy="21" r="5" fill="#fff" stroke="currentColor" stroke-width="2"/><circle cx="31" cy="21" r="5" fill="#fff" stroke="currentColor" stroke-width="2"/><path d="M22 21h4" stroke="currentColor" stroke-width="2"/><path d="M16 33q8 5 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>';
+      auditor.appendChild(cara);
+      auditor.appendChild(el("p", "gm-auditor-dice", info.saludo));
+      ui.escenario.appendChild(auditor);
+
+      var zonas = el("div", "gm-zonas");
+      var mesaZona = el("div", "gm-zona gm-mesa");
+      mesaZona.setAttribute("data-drop", "mesa");
+      mesaZona.appendChild(el("p", "gm-zona-titulo", "Papeles sobre la mesa"));
+      var mesaCont = el("div", "gm-papeles");
+      mesaZona.appendChild(mesaCont);
+      var carpetaZona = el("div", "gm-zona gm-carpeta");
+      carpetaZona.setAttribute("data-drop", "carpeta");
+      var carpetaTitulo = el("p", "gm-zona-titulo", "");
+      carpetaZona.appendChild(carpetaTitulo);
+      var carpetaCont = el("div", "gm-papeles");
+      carpetaZona.appendChild(carpetaCont);
+      zonas.appendChild(mesaZona);
+      zonas.appendChild(carpetaZona);
+      ui.escenario.appendChild(zonas);
+
+      var elems = {};
+      mezclar(papeles).forEach(function (p) {
+        var b = el("button", "gm-papel");
+        b.type = "button";
+        b.setAttribute("data-drag", "");
+        b.dataset.id = p.id;
+        b.appendChild(el("strong", "", p.nombre));
+        b.appendChild(el("small", "", p.detalle));
+        elems[p.id] = b;
+        mesaCont.appendChild(b);
+      });
+
+      function adentro() {
+        return papeles.filter(function (p) { return elems[p.id].parentNode === carpetaCont; });
+      }
+
+      function actualizar() {
+        var n = adentro().length;
+        carpetaTitulo.textContent = "Carpeta para el auditor (" + n + ")";
+        ui.hud([["Papeles en la carpeta", n]]);
+      }
+
+      function mover(id, zona) {
+        var destino = zona === "carpeta" ? carpetaCont : mesaCont;
+        if (elems[id].parentNode === destino) return;
+        destino.appendChild(elems[id]);
+        sonido.tic();
+        actualizar();
+      }
+
+      function entregar() {
+        var dentro = adentro();
+        var falta = papeles.filter(function (p) { return p.va && dentro.indexOf(p) < 0; });
+        var sobra = dentro.filter(function (p) { return !p.va; });
+        if (falta.length) {
+          sonido.mal();
+          ui.decir("Auditor: me falta " + lista(falta.map(function (p) { return "«" + p.nombre + "»"; })) + ". Sin eso no puedo certificar.", "mal");
+        } else if (sobra.length) {
+          sonido.mal();
+          ui.decir("Auditor: «" + sobra[0].nombre + "» no prueba nada sobre el sistema. Sacalo de la carpeta.", "mal");
+        } else {
+          auditoriaOk = true;
+          sonido.bien();
+          var s = el("div", "gm-sello");
+          s.appendChild(icono("sello"));
+          var t = el("div");
+          t.appendChild(el("p", "gm-sello-frase", "Plan certificable"));
+          t.appendChild(el("p", "gm-sello-nota", info.aprobado));
+          s.appendChild(t);
+          ui.escenario.appendChild(s);
+          ui.decir("Auditor: carpeta completa.", "bien");
+          ui.terminarCon("Continuar", function () { terminar(info.resumen); });
+        }
+      }
+
+      activarArrastre(ui.raiz, {
+        puedeArrastrar: function (f) { return activo && f.classList.contains("gm-papel"); },
+        alSoltar: function (f, d) {
+          if (d && d.dataset.drop) mover(f.dataset.id, d.dataset.drop);
+        },
+        alTocar: function (f) {
+          if (!activo || !f || !f.classList.contains("gm-papel")) return;
+          mover(f.dataset.id, f.parentNode === carpetaCont ? "mesa" : "carpeta");
+        }
+      });
+
+      actualizar();
+      return function () {
+        activo = true;
+        ui.decir("Arrastrá a la carpeta (o tocá) lo que prueba que el sistema existe y funciona. Después entregásela al auditor.", "");
+        var b = boton("Entregar la carpeta", entregar);
+        b.classList.add("gm-seguir");
+        ui.bandeja.appendChild(b);
+      };
+    }
+
+    /* ---------- Cierre ---------- */
+    function cierre() {
+      raiz.innerHTML = "";
+      var base = {};
+      cfg.plan.piezas.forEach(function (p) { base[p.id] = "correctivo"; });
+      var sinPlan = simular(cfg, base);
+      var neto = sinPlan.directoTotal + sinPlan.oportTotal - (res.directoTotal + res.oportTotal + costoPrograma(cfg, plan));
+
+      var criterios = [
+        { ok: !res.sobregasto, texto: cfg.final.criterios[0] },
+        { ok: !res.paradaTotal, texto: cfg.final.criterios[1] },
+        { ok: auditoriaOk, texto: cfg.final.criterios[2] }
+      ];
+      var estrellas = Math.max(1, criterios.filter(function (c) { return c.ok; }).length);
+
+      var c = el("div", "gm-final");
+      c.appendChild(el("h2", "", cfg.final.titulo));
+      var st = el("p", "gm-estrellas");
+      st.setAttribute("aria-label", estrellas + (estrellas === 1 ? " estrella" : " estrellas") + " de 3");
+      for (var i = 1; i <= 3; i++) st.appendChild(el("span", i <= estrellas ? "llena" : "", "★"));
+      c.appendChild(st);
+      c.appendChild(el("p", "gm-final-resultado", neto > 0 ? "Resultado económico: ahorro de " + plata(neto) : neto < 0 ? "Resultado económico: pérdida de " + plata(-neto) : "Resultado económico: igual que no prevenir"));
+      var ul = el("ul", "gm-criterios");
+      criterios.forEach(function (k) {
+        var li = el("li", k.ok ? "ok" : "no");
+        li.appendChild(el("span", "gm-marca", k.ok ? "✓" : "✗"));
+        li.appendChild(document.createTextNode(k.texto));
+        ul.appendChild(li);
+      });
+      c.appendChild(ul);
+      c.appendChild(el("p", "gm-mensaje-final", cfg.final.mensaje));
+
+      var rep = el("div", "gm-repaso");
+      rep.appendChild(el("h3", "", "Para llevarte"));
+      var ul2 = el("ul");
+      cfg.final.repaso.forEach(function (t) { ul2.appendChild(el("li", "", t)); });
+      rep.appendChild(ul2);
+      c.appendChild(rep);
+
+      var acciones = el("div", "gm-acciones");
+      var otro = boton("Probar otro plan", function () { empezar(1); });
+      acciones.appendChild(otro);
+      var de0 = boton("Jugar de nuevo", function () { empezar(0); });
+      de0.classList.add("secundario");
+      acciones.appendChild(de0);
+      c.appendChild(acciones);
+      raiz.appendChild(c);
+    }
+  }
+
+  window.Juego = window.Juego || {};
+  window.Juego.guardia = guardia;
+})();
