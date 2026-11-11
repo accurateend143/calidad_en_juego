@@ -12,7 +12,7 @@ calidad-en-juego/
 ├── index.html      Inicio con los tres juegos
 ├── juego1.html     Gestión de la Calidad ("La Cinta de Calidad")
 ├── juego2.html     Herramientas de Calidad ("Mesa de Datos")
-├── juego3.html     Guardia de Mantenimiento (normas + plan + simulación)
+├── juego3.html     Guardia de Mantenimiento (juego de 3 rondas)
 ├── css/styles.css  Estilos
 ├── css/cinta.css   Estilos de La Cinta de Calidad
 ├── css/mesa.css    Estilos de Mesa de Datos

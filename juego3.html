@@ -3,20 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Normas y Mantenimiento · Calidad en juego</title>
+  <title>Guardia de Mantenimiento · Calidad en juego</title>
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/cinta.css">
   <link rel="stylesheet" href="css/guardia.css">
 </head>
-<body>
-  <div class="contenedor">
-    <a class="volver" href="index.html">← Volver al inicio</a>
-    <section class="panel">
+<body class="pagina-juego">
+  <header class="banda">
+    <div class="banda-contenido">
+      <a class="volver" href="index.html">← Volver al inicio</a>
       <h1>⚙️ Guardia de Mantenimiento</h1>
-      <p class="consigna">Sos jefe de mantenimiento del clasificador automático de paquetería.</p>
+      <p>Normas y Mantenimiento · 3 rondas cortas. Se juega tocando o arrastrando.</p>
+    </div>
+  </header>
+
+  <main class="contenedor contenedor-juego">
+    <section class="panel panel-juego">
       <div id="juego"></div>
-      <p class="aviso">Juego con fines educativos. Los datos son simulados y no describen la operación real de Andreani.</p>
     </section>
-  </div>
+  </main>
+
+  <footer class="sitio">Instituto La Salette · 6° Computación · Muestra de fin de año</footer>
+
   <script src="js/guardia.js"></script>
   <script>Guardia.iniciar("juego");</script>
 </body>
