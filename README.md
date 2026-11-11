@@ -12,11 +12,13 @@ calidad-en-juego/
 ├── index.html      Inicio con los tres juegos
 ├── juego1.html     Gestión de la Calidad ("La Cinta de Calidad")
 ├── juego2.html     Herramientas de Calidad ("Mesa de Datos")
-├── juego3.html     Normas ISO y Mantenimiento (preguntas con explicación)
+├── juego3.html     Guardia de Mantenimiento (normas + plan + simulación)
 ├── css/styles.css  Estilos
 ├── css/cinta.css   Estilos de La Cinta de Calidad
 ├── css/mesa.css    Estilos de Mesa de Datos
 ├── js/common.js    Motores de juego (Juego.quiz y Juego.pares)
+├── css/guardia.css Estilos de Guardia de Mantenimiento
+├── js/guardia.js   Juego 3 (Guardia)
 ├── js/cinta.js     Motor de La Cinta de Calidad (Juego.cinta)
 └── js/mesa.js      Motor de Mesa de Datos (Juego.mesa)
 ```

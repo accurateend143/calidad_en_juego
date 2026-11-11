@@ -1,0 +1,35 @@
+.aviso{font-size:.8rem;color:var(--muted);margin:18px 0 0;text-align:center}
+.g-par{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g-col{display:grid;gap:8px;align-content:start}
+.g-sello{margin-top:14px;padding:12px;border:2px dashed var(--ok);border-radius:10px;background:var(--ok-bg);text-align:center}
+.g-msg{min-height:1.4em;font-size:.9rem;color:var(--bad);margin:8px 0}
+.g-presu{display:flex;justify-content:space-between;font-weight:600;margin-bottom:8px}
+.g-presu .sobra{color:var(--ok)}
+.g-piezas{display:grid;gap:8px}
+.g-pieza{border:2px solid var(--border);border-radius:10px;padding:10px;cursor:pointer;background:#fff}
+.g-pieza b{display:block}
+.g-pieza small{color:var(--muted)}
+.g-pieza .tipo{float:right;font-weight:700;color:var(--primary-dark)}
+.g-pieza.asig{border-color:var(--ok);background:var(--ok-bg)}
+.g-pieza.sobre{border-color:var(--primary);background:#eef4ff}
+.g-fichas{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.g-ficha{font:inherit;border:2px solid var(--border);background:#fff;border-radius:10px;padding:8px;cursor:grab;text-align:left}
+.g-ficha small{display:block;color:var(--muted)}
+.g-ficha.sel{border-color:var(--primary);background:#eef4ff}
+.g-tabla{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:8px}
+.g-tabla th,.g-tabla td{border:1px solid var(--border);padding:5px;text-align:left}
+.g-tabla th{background:#eef4ff}
+.g-semanas{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:12px 0}
+.g-sem{height:30px;border-radius:6px;background:var(--border);font-size:.7rem;display:flex;align-items:center;justify-content:center;color:#fff}
+.g-sem.verde{background:var(--ok)}
+.g-sem.ambar{background:#e39b12}
+.g-sem.gris{background:#7b8794}
+.g-maq{padding:14px;border-radius:10px;text-align:center;font-weight:700;color:#fff;background:var(--ok)}
+.g-maq.gris{background:#7b8794}
+.g-maq.ambar{background:#e39b12}
+.g-evento{min-height:2.6em;margin:10px 0;font-size:.95rem}
+.g-cartel{border:2px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;display:flex;justify-content:space-between}
+.g-cartel.niebla{background:repeating-linear-gradient(45deg,#dde6f0,#dde6f0 8px,#eef3f9 8px,#eef3f9 16px);color:var(--muted)}
+.g-barra{height:26px;border-radius:6px;color:#fff;font-size:.8rem;display:flex;align-items:center;padding:0 8px;margin:6px 0;white-space:nowrap}
+.g-estrellas{font-size:2rem;text-align:center;color:#e39b12}
+.g-check{list-style:none;padding:0;font-size:.9rem}
