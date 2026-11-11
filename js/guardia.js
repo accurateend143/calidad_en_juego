@@ -3,192 +3,183 @@ var Guardia = (function () {
   "use strict";
   var $ = function (t, c, x) { var e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
   var $$ = function (n) { return "$" + n.toLocaleString("es-AR"); };
-  var MONEDAS = 16; /* 1 moneda = $100.000 */
+  var mezclar = function (a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
 
-  var PARES = [
-    ["📜", "ISO", "Hace normas"],
-    ["⭐", "ISO 9001", "Calidad"],
-    ["🌱", "ISO 14001", "Ambiente"],
-    ["🔍", "Certificador", "Certifica"]
+  /* Ronda 1: clasificar. Cajones: 0 ISO 9001, 1 ISO 14001, 2 Certificador */
+  var CAJONES = ["⭐ ISO 9001", "🌱 ISO 14001", "🔍 Certificador"];
+  var ITEMS = [
+    ["🛢️", "Aceite usado", 1], ["🚚", "Humo de camiones", 1], ["🔋", "Baterías usadas", 1],
+    ["😀", "Cliente contento", 0], ["📞", "Reclamos de clientes", 0], ["📋", "Mejora continua", 0],
+    ["🕵️", "Auditoría externa", 2], ["🏅", "Sello de certificación", 2]
   ];
+
+  /* Ronda 2: piezas. t = segundos hasta que se rompe si nadie la toca */
   var PIEZAS = [
-    { id: "motor", e: "⚙️", n: "Motor", crit: "🔴" },
-    { id: "bandas", e: "🛞", n: "Bandas", crit: "🟡" },
-    { id: "lectores", e: "📷", n: "Lectores", crit: "🟡" },
-    { id: "impresora", e: "🖨️", n: "Impresora", crit: "🟢" },
-    { id: "sensores", e: "📡", n: "Sensores", crit: "🟡" }
+    { id: "motor", e: "⚙️", n: "Motor", tag: "🔴 crítico", t: 45, parada: 6, d: 4990000, o: 9500000 },
+    { id: "bandas", e: "🛞", n: "Bandas", tag: "se gastan", t: 25, parada: 3, d: 400000, o: 1200000 },
+    { id: "lectores", e: "📷", n: "Lectores", tag: "se desajustan", t: 18, parada: 0, d: 200000, o: 600000 },
+    { id: "impresora", e: "🖨️", n: "Impresora", tag: "🟢 no crítica", t: 32, parada: 0, d: 80000, o: 0 },
+    { id: "sensores", e: "📡", n: "Sensores", tag: "se ensucian", t: 55, parada: 1.5, d: 50000, o: 150000 }
   ];
-  var TIPOS = {
-    correctivo: { e: "🔧", n: "Correctivo", m: 0 },
-    preventivo: { e: "📅", n: "Preventivo", m: 3 },
-    predictivo: { e: "📈", n: "Predictivo", m: 9 },
-    operador: { e: "🧹", n: "Operador", m: 1 }
-  };
-
-  function mezclar(a) { a = a.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
-
-  /* Eventos fijos según el plan (cifras del motor: entrega 3; el resto simulado) */
-  function totales(plan) {
-    var t = function (p) { return plan[p] || "correctivo"; };
-    var prev = function (p) { return t(p) === "preventivo" || t(p) === "predictivo"; };
-    var ev = [];
-    ev.push(prev("lectores") ? { s: 3, c: "verde", txt: "📷 Lectores calibrados", d: 0, o: 0 } : { s: 3, c: "ambar", txt: "📷 Errores de destino", d: 200000, o: 600000 });
-    ev.push(prev("bandas") ? { s: 5, c: "verde", txt: "🛞 Bandas cambiadas en la parada", d: 0, o: 0 } : { s: 5, c: "gris", txt: "🛞 ¡Parada no planificada!", d: 400000, o: 1200000 });
-    ev.push(t("impresora") === "predictivo" ? { s: 6, c: "ambar", txt: "🖨️ Plata de más en algo no crítico", d: 0, o: 0 } : { s: 6, c: "verde", txt: "🖨️ Arreglo barato", d: 80000, o: 0 });
-    ev.push(t("motor") === "predictivo" ? { s: 8, c: "ambar", txt: "⚙️ Vibración detectada: parada corta", d: 360000, o: 0 } : { s: 9, c: "gris", txt: "⚙️ ¡Se rompió el motor! 6 horas parado", d: 4990000, o: 9500000 });
-    ev.push(t("sensores") === "operador" ? { s: 11, c: "verde", txt: "📡 Limpios en el cierre de turno", d: 0, o: 0 } : { s: 11, c: "ambar", txt: "📡 Sensores sucios: parada chica", d: 50000, o: 150000 });
-    var d = 0, o = 0, prog = 0;
-    ev.forEach(function (e) { d += e.d; o += e.o; });
-    PIEZAS.forEach(function (p) { prog += TIPOS[t(p.id)].m * 100000; });
-    return { ev: ev, d: d, o: o, prog: prog, total: d + o + prog };
-  }
+  var MONEDAS = 10, SEG_SEMANA = 5, SEMANAS = 12, BASE = 17170000; /* BASE: todo correctivo */
+  var HERR = { cal: { e: "📅", n: "Calendario", c: 1 }, sen: { e: "📈", n: "Sensor", c: 5 }, ope: { e: "🧹", n: "Operador", c: 1 } };
 
   function iniciar(id) {
-    var raiz = document.getElementById(id);
+    var raiz = document.getElementById(id), timers = [];
     portada();
 
-    function limpiar() { raiz.innerHTML = ""; }
-    function hud(ronda, extra) {
-      var h = $("div", "g-hud"); h.appendChild($("b", "", "Ronda " + ronda + " de 3")); h.appendChild($("span", "", extra || "")); raiz.appendChild(h);
-    }
+    function limpiar() { timers.forEach(clearInterval); timers = []; raiz.innerHTML = ""; }
+    function hud(a, b) { var h = $("div", "g-hud"); h.appendChild($("b", "", a)); h.appendChild($("span", "", b || "")); raiz.appendChild(h); return h; }
     function boton(txt, f) { var b = $("button", "btn", txt); b.type = "button"; b.onclick = f; return b; }
 
     function portada() {
       limpiar();
       var c = $("div", "cinta-portada");
       c.appendChild($("div", "g-hielo", "⚙️🧊"));
-      c.appendChild($("p", "cinta-intro", "Cuidá el clasificador de Andreani: elegí cómo mantener cada pieza."));
+      c.appendChild($("p", "cinta-intro", "Es tu turno de guardia: mantené el clasificador andando 12 semanas."));
       c.appendChild(boton("Jugar", ronda1));
-      c.appendChild($("p", "cinta-aviso", "Juego con fines educativos. Los datos son simulados y no describen la operación real de Andreani."));
-      c.lastChild.style.marginTop = "16px";
-      raiz.appendChild(c);
+      var a = $("p", "cinta-aviso", "Juego con fines educativos. Los datos son simulados y no describen la operación real de Andreani.");
+      a.style.marginTop = "16px"; c.appendChild(a); raiz.appendChild(c);
     }
 
-    /* Ronda 1: cables */
+    /* Ronda 1: clasificá lo que llega a la cinta antes de que se acabe el tiempo */
     function ronda1() {
-      limpiar(); hud(1, "Conectá cada norma");
-      var esc = $("div", "g-escena"), g = $("div", "g-cables"), c1 = $("div", "g-col"), c2 = $("div", "g-col"), izq = null, hechos = 0;
-      PARES.forEach(function (p, i) {
-        var b = $("button", "g-carta"); b.type = "button"; b.appendChild($("span", "e", p[0])); b.appendChild($("span", "", p[1]));
-        b.onclick = function () { if (b.classList.contains("hecha")) return; if (izq) izq.classList.remove("sel"); izq = b; b.dataset.i = i; b.classList.add("sel"); };
-        c1.appendChild(b);
-      });
-      mezclar(PARES.map(function (p, i) { return [p[2], i]; })).forEach(function (p) {
-        var b = $("button", "g-carta", p[0]); b.type = "button";
-        b.onclick = function () {
-          if (!izq || b.classList.contains("hecha")) return;
-          if (+izq.dataset.i === p[1]) {
-            izq.className = "g-carta hecha"; b.className = "g-carta hecha"; izq = null; hechos++;
-            if (hechos === PARES.length) {
-              var s = $("div", "g-centro");
-              s.appendChild($("div", "g-hielo", "✅"));
-              s.appendChild($("p", "", "ISO elabora, el certificador certifica."));
-              s.appendChild(boton("Siguiente", ronda2)); esc.appendChild(s);
-            }
-          } else { b.classList.add("sacudir"); setTimeout(function () { b.classList.remove("sacudir"); }, 350); }
-        };
-        c2.appendChild(b);
-      });
-      g.appendChild(c1); g.appendChild(c2); esc.appendChild(g); raiz.appendChild(esc);
+      limpiar();
+      var lista = mezclar(ITEMS), i = 0, vidas = 3, ok = 0;
+      var h = hud("Ronda 1 de 2", "Mandalo a su cajón");
+      var esc = $("div", "g-escena g-centro"), vi = $("div", "g-vidas"), card = $("div", "g-item"), barra = $("div", "g-tiempo"), rel = $("span"), caj = $("div", "g-cajones");
+      barra.appendChild(rel); esc.appendChild(vi); esc.appendChild(card); esc.appendChild(barra);
+      CAJONES.forEach(function (n, k) { var b = $("button", "g-carta", n); b.type = "button"; b.onclick = function () { elegir(k); }; caj.appendChild(b); });
+      esc.appendChild(caj); raiz.appendChild(esc);
+      var tm = null;
+      function pintarVidas() { vi.textContent = "❤️".repeat(vidas) + "🖤".repeat(3 - vidas) + "  ✔ " + ok; }
+      function siguiente() {
+        if (i >= lista.length || vidas === 0) return fin();
+        var it = lista[i]; card.textContent = ""; card.appendChild($("div", "g-emoji", it[0])); card.appendChild($("div", "", it[1]));
+        rel.style.transition = "none"; rel.style.width = "100%"; void rel.offsetWidth; rel.style.transition = "width 4s linear"; rel.style.width = "0%";
+        clearTimeout(tm); tm = setTimeout(function () { elegir(-1); }, 4000); pintarVidas();
+      }
+      function elegir(k) {
+        clearTimeout(tm);
+        if (k === lista[i][2]) { ok++; card.classList.add("bien"); } else { vidas--; card.classList.add("sacudir"); }
+        setTimeout(function () { card.className = "g-item"; i++; siguiente(); }, 280);
+        pintarVidas();
+      }
+      function fin() {
+        clearTimeout(tm); esc.innerHTML = "";
+        esc.appendChild($("div", "g-hielo", ok >= 6 ? "🏅" : "👍"));
+        esc.appendChild($("p", "", ok + " de " + lista.length + " bien"));
+        var m = $("p", "cinta-mensaje-final", "ISO escribe las normas. Certifica un organismo independiente."); m.style.textAlign = "left"; esc.appendChild(m);
+        esc.appendChild(boton("A la guardia", ronda2));
+      }
+      siguiente();
     }
 
-    /* Ronda 2: plan */
+    /* Ronda 2: 12 semanas en tiempo real */
     function ronda2() {
-      limpiar(); hud(2, "Armá el plan");
-      var plan = {}, sel = null, esc = $("div", "g-escena");
-      esc.appendChild($("p", "g-titulo", "Tocá o arrastrá una ficha sobre cada pieza"));
-      var linea = $("div", "g-linea"), fichas = $("div", "g-fichas"), mon = $("div", "g-hud");
-      var gasto = function (ex) { var s = 0; PIEZAS.forEach(function (p) { if (p.id !== ex && plan[p.id]) s += TIPOS[plan[p.id]].m; }); return s; };
-      function poner(pid, tipo) {
-        if (gasto(pid) + TIPOS[tipo].m > MONEDAS) { esc.classList.add("sacudir"); setTimeout(function () { esc.classList.remove("sacudir"); }, 350); return; }
-        plan[pid] = tipo; pintar();
-      }
-      function pintar() {
-        var resta = MONEDAS - gasto();
-        mon.innerHTML = ""; mon.appendChild($("b", "", "🪙 " + resta)); mon.appendChild($("span", "", "🔴 crítico · 🟡 medio · 🟢 no crítico"));
-        linea.innerHTML = "";
-        PIEZAS.forEach(function (p) {
-          var d = $("div", "g-pieza" + (plan[p.id] ? " asig" : ""));
-          d.appendChild($("span", "e", p.e)); d.appendChild($("small", "", p.n + " " + p.crit));
-          d.appendChild($("span", "chip", plan[p.id] ? TIPOS[plan[p.id]].e : "·"));
-          d.onclick = function () { if (sel) poner(p.id, sel); };
-          d.ondragover = function (e) { e.preventDefault(); d.classList.add("sobre"); };
-          d.ondragleave = function () { d.classList.remove("sobre"); };
-          d.ondrop = function (e) { e.preventDefault(); var t = e.dataTransfer.getData("text/plain"); if (TIPOS[t]) poner(p.id, t); };
-          linea.appendChild(d);
-        });
-        [].forEach.call(fichas.children, function (f) { f.classList.toggle("no", TIPOS[f.dataset.k].m > resta); });
-        go.disabled = Object.keys(plan).length < PIEZAS.length;
-      }
-      Object.keys(TIPOS).forEach(function (k) {
-        var f = $("button", "g-ficha", TIPOS[k].e + " " + TIPOS[k].n + " · " + (TIPOS[k].m ? "🪙" + TIPOS[k].m : "gratis")); f.type = "button"; f.dataset.k = k; f.draggable = true;
-        f.onclick = function () { sel = k; [].forEach.call(fichas.children, function (c) { c.classList.remove("sel"); }); f.classList.add("sel"); };
-        f.ondragstart = function (e) { e.dataTransfer.setData("text/plain", k); };
-        fichas.appendChild(f);
+      limpiar();
+      var coins = MONEDAS, tool = "cal", t = 0, bultos = 0, d = 0, o = 0, fallas = 0, gastoImp = 0, motorOk = true, fin = false;
+      var P = {}; PIEZAS.forEach(function (p) { P[p.id] = { def: p, h: 100, rate: 100 / p.t, estado: "ok", sensor: false, ope: false, libre: 0 }; });
+      var info = hud("Semana 1", "");
+      var esc = $("div", "g-escena"), barra = $("div", "g-herr"), belt = $("div", "g-belt"), maq = $("div", "g-maq", "⚙️"), pila = $("div", "g-pila");
+      var linea = $("div", "g-linea"), gs = $("div", "g-semanas"), aviso = $("div", "g-aviso", "Elegí una herramienta y tocá una pieza. Si se rompe: tocala para arreglarla."), cel = [];
+      Object.keys(HERR).forEach(function (k) {
+        var b = $("button", "g-ficha" + (k === tool ? " sel" : ""), HERR[k].e + " " + HERR[k].n + " 🪙" + HERR[k].c); b.type = "button";
+        b.onclick = function () { tool = k; [].forEach.call(barra.children, function (c) { c.classList.remove("sel"); }); b.classList.add("sel"); };
+        barra.appendChild(b);
       });
-      var go = boton("¡Arrancar 12 semanas!", function () { ronda3(plan); });
-      esc.appendChild(mon); esc.appendChild(linea); esc.appendChild(fichas);
-      var c = $("div", "g-centro"); c.appendChild(go); esc.appendChild(c);
-      raiz.appendChild(esc); pintar();
-    }
+      belt.appendChild(maq); belt.appendChild(pila);
+      for (var s = 1; s <= SEMANAS; s++) { var c = $("div", "g-sem", s); cel.push(c); gs.appendChild(c); }
+      var cd = $("div", "g-cartel"), vd = $("span", "", $$(0)), co = $("div", "g-cartel niebla");
+      cd.appendChild($("span", "", "💵 Directos")); cd.appendChild(vd); co.appendChild($("span", "", "🧊 Oportunidad")); co.appendChild($("span", "", "???"));
+      esc.appendChild(barra); esc.appendChild(belt); esc.appendChild(linea); esc.appendChild(gs); esc.appendChild(aviso); esc.appendChild(cd); esc.appendChild(co);
+      raiz.appendChild(esc);
 
-    /* Ronda 3: simulación y balance */
-    function ronda3(plan) {
-      limpiar(); hud(3, "Mirá qué pasa");
-      var r = totales(plan), sem = 0, dAc = r.prog, esc = $("div", "g-escena");
-      var belt = $("div", "g-belt"), maq = $("div", "g-maq", "⚙️"), pila = $("div", "g-pila");
-      belt.appendChild(maq); belt.appendChild(pila); esc.appendChild(belt);
-      var gs = $("div", "g-semanas"), cel = [];
-      for (var i = 1; i <= 12; i++) { var c = $("div", "g-sem", i); cel.push(c); gs.appendChild(c); }
-      esc.appendChild(gs);
-      var aviso = $("div", "g-aviso", "Semana 1"); esc.appendChild(aviso);
-      var cd = $("div", "g-cartel"); cd.appendChild($("span", "", "💵 Directos")); var vd = $("span", "", $$(dAc)); cd.appendChild(vd);
-      var co = $("div", "g-cartel niebla"); co.appendChild($("span", "", "🧊 Oportunidad")); co.appendChild($("span", "", "???"));
-      esc.appendChild(cd); esc.appendChild(co); raiz.appendChild(esc);
-      var estado = "";
-      var spawn = setInterval(function () {
-        if (estado === "gris") { if (pila.children.length < 12) pila.appendChild($("span", "", "📦")); return; }
-        var k = $("span", "g-caja", "📦"); belt.appendChild(k); setTimeout(function () { if (k.parentNode) k.parentNode.removeChild(k); }, 3300);
-      }, 650);
-      var h = setInterval(function () {
-        sem++;
-        var e = r.ev.filter(function (x) { return x.s === sem; })[0];
-        if (e) {
-          cel[sem - 1].classList.add(e.c); aviso.textContent = e.txt; dAc += e.d; vd.textContent = $$(dAc);
-          estado = e.c; maq.className = "g-maq " + (e.c === "verde" ? "" : e.c); esc.classList.toggle("parada", e.c === "gris");
-          if (e.c === "gris") { /* parada: se reanuda en 2 semanas */ }
-        } else {
-          cel[sem - 1].classList.add(estado === "gris" ? "gris" : "verde");
-          if (estado === "gris" && sem - lastGris(r, sem) >= 2) { estado = ""; maq.className = "g-maq"; esc.classList.remove("parada"); pila.innerHTML = ""; aviso.textContent = "Semana " + sem; }
-          else if (estado !== "gris") { estado = ""; maq.className = "g-maq"; aviso.textContent = "Semana " + sem; }
+      PIEZAS.forEach(function (p) {
+        var el = $("div", "g-pieza"); el.id = "gp-" + p.id; el.onclick = function () { tocar(p.id); };
+        el.appendChild($("span", "e", p.e)); el.appendChild($("small", "", p.n)); el.appendChild($("small", "", p.tag));
+        var bar = $("div", "g-vida"); bar.appendChild($("span")); el.appendChild(bar); el.appendChild($("span", "chip", ""));
+        linea.appendChild(el);
+      });
+
+      function gastar(n) { if (coins < n) { sacudir(esc); return false; } coins -= n; return true; }
+      function sacudir(e) { e.classList.add("sacudir"); setTimeout(function () { e.classList.remove("sacudir"); }, 300); }
+      function tocar(id) {
+        var p = P[id];
+        if (fin) return;
+        if (p.estado === "roto") { /* correctivo: gratis, pero con la máquina parada */
+          p.estado = "arreglando"; p.libre = t + p.def.parada; p.h = 100; p.rate *= 0.6; aviso.textContent = "🔧 Arreglando " + p.def.n.toLowerCase(); return;
         }
-        if (sem >= 12) { clearInterval(h); clearInterval(spawn); setTimeout(function () { balance(plan, r); }, 900); }
-      }, 700);
-    }
-    function lastGris(r, sem) { var m = 0; r.ev.forEach(function (e) { if (e.c === "gris" && e.s <= sem) m = Math.max(m, e.s); }); return m; }
+        if (p.estado !== "ok") return;
+        if (tool === "cal") {
+          if (!gastar(1)) return; if (id === "impresora") gastoImp++;
+          p.h = 100; p.rate *= 0.6; p.estado = "plan"; p.libre = t + 1; aviso.textContent = "📅 Calibrado a tiempo";
+          if (id === "motor" && p.sensor) { d += 360000; }
+        } else if (tool === "sen") {
+          if (p.sensor) return; if (!gastar(5)) return; p.sensor = true; if (id === "impresora") gastoImp++; aviso.textContent = "📈 Sensor: ahora ves el estado";
+        } else if (tool === "ope") {
+          if (id !== "sensores") { sacudir(esc); aviso.textContent = "🧹 Esto lo limpia el operador: los sensores"; return; }
+          if (p.ope) return; if (!gastar(1)) return; p.ope = true; aviso.textContent = "🧹 El operador los limpia cada turno";
+        }
+      }
+      /* con sensor, tocar una pieza con poca vida con 📅 cuesta lo mismo; el motor con sensor se repara en parada corta */
 
-    function balance(plan, r) {
-      limpiar(); hud(3, "Balance");
+      function frame() {
+        t += 0.1;
+        var parado = false, ambar = false;
+        PIEZAS.forEach(function (def) {
+          var p = P[def.id];
+          if (p.estado === "ok") {
+            if (!p.ope) p.h -= p.rate * 0.1; else if (def.id === "sensores") p.h = 100;
+            if (p.h <= 0) { p.h = 0; p.estado = "roto"; fallas += (def.id === "impresora" ? 0 : 1); d += def.d; o += def.o; if (def.id === "motor") motorOk = false; aviso.textContent = "💥 ¡Falla! " + def.n; }
+          } else if ((p.estado === "plan" || p.estado === "arreglando") && t >= p.libre) p.estado = "ok";
+          if ((p.estado === "roto" || p.estado === "arreglando") && def.parada > 0) parado = true;
+          if (p.estado === "plan" || (p.estado === "roto" && def.parada === 0 && def.id === "lectores")) ambar = true;
+        });
+        var est = parado ? "gris" : ambar ? "ambar" : "verde";
+        maq.className = "g-maq " + (est === "verde" ? "" : est); esc.classList.toggle("parada", parado);
+        var w = Math.min(SEMANAS, Math.floor(t / SEG_SEMANA) + 1);
+        cel[w - 1].className = "g-sem " + (cel[w - 1].classList.contains("gris") ? "gris" : est);
+        if (parado && pila.children.length < 12 && Math.round(t * 10) % 6 === 0) pila.appendChild($("span", "", "📦"));
+        if (!parado) { pila.innerHTML = ""; if (Math.round(t * 10) % 6 === 0) { var k = $("span", "g-caja", "📦"); belt.appendChild(k); bultos++; setTimeout(function () { if (k.parentNode) k.parentNode.removeChild(k); }, 3300); } }
+        pintar(w);
+        if (t >= SEMANAS * SEG_SEMANA) { fin = true; clearInterval(h); setTimeout(function () { balance(d, o, MONEDAS - coins, fallas, motorOk, gastoImp, bultos); }, 600); }
+      }
+      function pintar(w) {
+        info.lastChild.textContent = "";
+        info.firstChild.textContent = "Semana " + w + " de " + SEMANAS;
+        info.lastChild.textContent = "🪙 " + coins + "  📦 " + bultos;
+        vd.textContent = $$(d + (MONEDAS - coins) * 100000);
+        PIEZAS.forEach(function (def) {
+          var p = P[def.id], el = document.getElementById("gp-" + def.id);
+          el.className = "g-pieza " + (p.estado === "roto" ? "roto" : p.estado === "ok" ? "" : "asig");
+          var bar = el.children[3]; bar.style.display = p.sensor ? "block" : "none";
+          bar.firstChild.style.width = p.h + "%"; bar.firstChild.className = p.h < 35 ? "bajo" : "";
+          el.lastChild.textContent = (p.estado === "roto" ? "💥" : p.sensor && p.h < 35 ? "⚠️" : "") + (p.sensor ? "📈" : "") + (p.ope ? "🧹" : "");
+        });
+      }
+      var h = setInterval(frame, 100); timers.push(h); pintar(1);
+    }
+
+    function balance(d, o, gasto, fallas, motorOk, gastoImp, bultos) {
+      limpiar(); hud("Balance", "📦 " + bultos + " bultos");
+      var prog = gasto * 100000, dir = d + prog, tot = dir + o;
       var esc = $("div", "g-escena g-centro");
       esc.appendChild($("div", "g-hielo", "🧊"));
-      var max = Math.max(r.d + r.prog, r.o, 1);
-      var bd = $("div", "g-bar", "💵 Directos " + $$(r.d + r.prog)); bd.style.background = "#1f6feb"; bd.style.width = "10%";
-      var bo = $("div", "g-bar", "🧊 Ocultos " + $$(r.o)); bo.style.background = "#3b8fb5"; bo.style.width = "10%";
+      var max = Math.max(dir, o, 1);
+      var bd = $("div", "g-bar", "💵 Directos " + $$(dir)); bd.style.background = "#1f6feb"; bd.style.width = "10%";
+      var bo = $("div", "g-bar", "🧊 Ocultos " + $$(o)); bo.style.background = "#3b8fb5"; bo.style.width = "10%";
       esc.appendChild(bd); esc.appendChild(bo);
-      setTimeout(function () { bd.style.width = Math.max(48, (r.d + r.prog) / max * 100) + "%"; bo.style.width = Math.max(48, r.o / max * 100) + "%"; }, 80);
-      var ahorro = totales({}).total - r.total;
-      esc.appendChild($("p", "", (ahorro >= 0 ? "Ahorraste " : "Perdiste ") + $$(Math.abs(ahorro)) + " frente a no prevenir"));
-      var ok = [plan.impresora === "correctivo", plan.motor === "predictivo", true];
-      var est = Math.max(1, ok.filter(Boolean).length);
-      var es = $("div", "cinta-estrellas"); for (var i = 0; i < 3; i++) { var s = $("span", i < est ? "llena" : "", "★"); es.appendChild(s); }
+      setTimeout(function () { bd.style.width = Math.max(48, dir / max * 100) + "%"; bo.style.width = Math.max(48, o / max * 100) + "%"; }, 80);
+      var ah = BASE - tot;
+      esc.appendChild($("p", "", (ah >= 0 ? "Ahorraste " : "Perdiste ") + $$(Math.abs(ah)) + " frente a no prevenir nada"));
+      var oks = [motorOk, gastoImp === 0, fallas <= 1], est = Math.max(1, oks.filter(Boolean).length);
+      var es = $("div", "cinta-estrellas"); for (var i = 0; i < 3; i++) es.appendChild($("span", i < est ? "llena" : "", "★"));
       esc.appendChild(es);
-      var ch = $("div", "g-check");
-      ch.appendChild($("span", "", (ok[0] ? "✅" : "❌") + "🖨️")); ch.appendChild($("span", "", (ok[1] ? "✅" : "❌") + "⚙️"));
+      var ch = $("div", "g-check"); [["⚙️", oks[0]], ["🖨️", oks[1]], ["🔧", oks[2]]].forEach(function (x) { ch.appendChild($("span", "", (x[1] ? "✅" : "❌") + x[0])); });
       esc.appendChild(ch);
-      esc.appendChild($("p", "cinta-mensaje-final", "El costo de una falla no es solo la factura de la reparación."));
-      esc.lastChild.style.textAlign = "left";
-      esc.appendChild(boton("Probar otro plan", ronda2));
-      raiz.appendChild(esc);
+      var m = $("p", "cinta-mensaje-final", "El costo de una falla no es solo la factura de la reparación."); m.style.textAlign = "left"; esc.appendChild(m);
+      esc.appendChild(boton("Jugar otra vez", ronda2)); raiz.appendChild(esc);
     }
   }
   return { iniciar: iniciar };

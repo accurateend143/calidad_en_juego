@@ -36,9 +36,27 @@
 .g-aviso{min-height:2.2em;text-align:center;font-weight:700;font-size:1.05rem}
 .g-cartel{display:flex;justify-content:space-between;padding:8px 12px;margin-top:6px;border:2px solid var(--border);border-radius:10px;background:#fff;font-weight:700}
 .g-cartel.niebla{background:repeating-linear-gradient(45deg,#dde6f0,#dde6f0 8px,#eef3f9 8px,#eef3f9 16px);color:var(--muted)}
-.g-bar{height:30px;border-radius:8px;color:#fff;font-weight:700;display:flex;align-items:center;padding:0 10px;margin:8px 0;white-space:nowrap;transition:width 1s}
+.g-bar{overflow:hidden;height:30px;border-radius:8px;color:#fff;font-weight:700;display:flex;align-items:center;padding:0 10px;margin:8px 0;white-space:nowrap;transition:width 1s}
 .g-hielo{text-align:center;font-size:3rem;margin:4px 0}
 .g-check{display:flex;justify-content:center;gap:14px;font-size:1.4rem;margin:6px 0}
 .g-centro{text-align:center}
 .g-centro .btn{margin-top:14px}
 @media(prefers-reduced-motion:reduce){.g-caja{animation:none;left:40%}}
+.g-vidas{font-size:1.1rem;margin-bottom:6px}
+.g-item{padding:14px;border:2px solid var(--border);border-radius:14px;background:#fff;font-weight:700;min-height:96px}
+.g-item.bien{border-color:var(--acento);background:var(--acento-bg)}
+.g-item.sacudir{border-color:var(--bad);background:var(--bad-bg)}
+.g-emoji{font-size:2.6rem}
+.g-tiempo{height:8px;background:var(--border);border-radius:99px;overflow:hidden;margin:10px 0}
+.g-tiempo span{display:block;height:100%;width:100%;background:var(--primary)}
+.g-cajones{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.g-cajones .g-carta{justify-content:center;text-align:center;font-size:.8rem;min-height:60px}
+.g-herr{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:8px}
+.g-ficha{cursor:pointer;padding:6px 10px;font-size:.8rem}
+.g-pieza{cursor:pointer;position:relative;padding:8px 2px}
+.g-pieza small{min-height:0;font-size:.62rem}
+.g-pieza.roto{border-color:var(--bad);background:var(--bad-bg);animation:cinta-sacudir .5s infinite}
+.g-vida{display:none;height:6px;background:var(--border);border-radius:9px;margin:4px 6px;overflow:hidden}
+.g-vida span{display:block;height:100%;background:var(--ok)}
+.g-vida span.bajo{background:var(--bad)}
+.g-pieza .chip{font-size:.85rem;min-height:1.3em}
