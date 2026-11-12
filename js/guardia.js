@@ -21,7 +21,7 @@ var Guardia = (function () {
     { id: "impresora", e: "🖨️", n: "Impresora", tag: "🟢 no crítica", t: 32, parada: 0, d: 80000, o: 0 },
     { id: "sensores", e: "📡", n: "Sensores", tag: "se ensucian", t: 55, parada: 1.5, d: 50000, o: 150000 }
   ];
-  var MONEDAS = 10, SEG_SEMANA = 5, SEMANAS = 12, BASE = 17170000; /* BASE: todo correctivo */
+  var MONEDAS = 10, SEG_SEMANA = 4, SEMANAS = 12, BASE = 17170000; /* BASE: todo correctivo */
   var HERR = { cal: { e: "📅", n: "Calendario", c: 1 }, sen: { e: "📈", n: "Sensor", c: 5 }, ope: { e: "🧹", n: "Operador", c: 1 } };
 
   function iniciar(id) {
@@ -37,9 +37,36 @@ var Guardia = (function () {
       var c = $("div", "cinta-portada");
       c.appendChild($("div", "g-hielo", "⚙️🧊"));
       c.appendChild($("p", "cinta-intro", "Es tu turno de guardia: mantené el clasificador andando 12 semanas."));
-      c.appendChild(boton("Jugar", ronda1));
+      c.appendChild(boton("Jugar", intro1));
       var a = $("p", "cinta-aviso", "Juego con fines educativos. Los datos son simulados y no describen la operación real de Andreani.");
       a.style.marginTop = "16px"; c.appendChild(a); raiz.appendChild(c);
+    }
+
+
+    function intro(ronda, titulo, lineas, cb) {
+      limpiar(); hud(ronda, "");
+      var c = $("div", "g-escena g-instr");
+      c.appendChild($("h2", "", titulo));
+      lineas.forEach(function (l) { c.appendChild($("p", "", l)); });
+      c.appendChild(boton("¡Empezar!", cb)); raiz.appendChild(c);
+    }
+    function intro1() {
+      intro("Ronda 1 de 2", "📦 Al cajón", [
+        "Llegan objetos a la cinta. Tocá el cajón correcto antes de que se acabe el tiempo.",
+        "⭐ ISO 9001 = calidad y clientes",
+        "🌱 ISO 14001 = ambiente",
+        "🔍 Certificador = auditoría y sello"
+      ], ronda1);
+    }
+    function intro2() {
+      intro("Ronda 2 de 2", "⚙️ La guardia", [
+        "Las piezas se desgastan solas. ¡Que el clasificador no se pare!",
+        "1️⃣ Elegí una herramienta",
+        "2️⃣ Tocá una pieza",
+        "💥 Si se rompe, tocala para arreglarla (la máquina se para).",
+        "📅 Calendario: la cuida a ciegas · 📈 Sensor: te muestra su desgaste · 🧹 Operador: cuida los sensores",
+        "🪙 Las monedas no alcanzan para todo: cuidá primero lo crítico 🔴."
+      ], ronda2);
     }
 
     /* Ronda 1: clasificá lo que llega a la cinta antes de que se acabe el tiempo */
@@ -70,7 +97,7 @@ var Guardia = (function () {
         esc.appendChild($("div", "g-hielo", ok >= 6 ? "🏅" : "👍"));
         esc.appendChild($("p", "", ok + " de " + lista.length + " bien"));
         var m = $("p", "cinta-mensaje-final", "ISO escribe las normas. Certifica un organismo independiente."); m.style.textAlign = "left"; esc.appendChild(m);
-        esc.appendChild(boton("A la guardia", ronda2));
+        esc.appendChild(boton("A la guardia", intro2));
       }
       siguiente();
     }
@@ -79,7 +106,7 @@ var Guardia = (function () {
     function ronda2() {
       limpiar();
       var coins = MONEDAS, tool = "cal", t = 0, bultos = 0, d = 0, o = 0, fallas = 0, gastoImp = 0, motorOk = true, fin = false;
-      var P = {}; PIEZAS.forEach(function (p) { P[p.id] = { def: p, h: 100, rate: 100 / p.t, estado: "ok", sensor: false, ope: false, libre: 0 }; });
+      var P = {}; PIEZAS.forEach(function (p) { P[p.id] = { def: p, h: 100, rate: 100 / (p.t * 0.8), estado: "ok", sensor: false, ope: false, libre: 0 }; });
       var info = hud("Semana 1", "");
       var esc = $("div", "g-escena"), barra = $("div", "g-herr"), belt = $("div", "g-belt"), maq = $("div", "g-maq", "⚙️"), pila = $("div", "g-pila");
       var linea = $("div", "g-linea"), gs = $("div", "g-semanas"), aviso = $("div", "g-aviso", "Elegí una herramienta y tocá una pieza. Si se rompe: tocala para arreglarla."), cel = [];

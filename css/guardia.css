@@ -60,3 +60,7 @@
 .g-vida span{display:block;height:100%;background:var(--ok)}
 .g-vida span.bajo{background:var(--bad)}
 .g-pieza .chip{font-size:.85rem;min-height:1.3em}
+.g-instr{text-align:center}
+.g-instr h2{margin:0 0 10px;font-size:1.3rem}
+.g-instr p{margin:6px 0;text-align:left;font-size:.95rem}
+.g-instr .btn{margin-top:14px}
